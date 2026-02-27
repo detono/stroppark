@@ -5,13 +5,12 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-// core/network/KtorClient.kt
-val sharedKtorClient = HttpClient {
+fun createHttpClient() = HttpClient {
   install(ContentNegotiation) {
     json(Json {
       ignoreUnknownKeys = true
       prettyPrint = true
+      isLenient = true
     })
   }
-  // You can add logging or headers here
 }

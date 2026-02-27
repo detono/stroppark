@@ -13,10 +13,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ParkingListScreen(viewModel: MainViewModel) {
+fun ParkingListScreen(viewModel: ParkingViewModel = koinViewModel ()) {
   val uiState by viewModel.uiState.collectAsState()
 
   Column(modifier = Modifier.fillMaxSize()) {

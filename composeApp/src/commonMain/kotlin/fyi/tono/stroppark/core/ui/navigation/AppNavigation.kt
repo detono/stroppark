@@ -7,57 +7,44 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import fyi.tono.stroppark.features.chargers.ui.screens.ChargerListScreen
+import fyi.tono.stroppark.features.parking.ui.screens.ParkingListScreen
+
 
 @Composable
 fun AppNavigation(
-  viewModel: MainViewModel,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  navController: NavHostController = rememberNavController()
 ) {
-  val navController = rememberNavController()
 
   Scaffold(
     bottomBar = {
-      NavigationBar {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
-
-        val items = listOf(
-          NavItem.Parking,
-          NavItem.Chargers
-        )
-
-        items.forEach { item ->
-          NavigationBarItem(
-            icon = { Icon(item.icon, contentDescription = null) },
-            label = { Text(item.title) },
-            selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-            onClick = {
-              navController.navigate(item.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                  saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-              }
-            }
-          )
-        }
-      }
+      StropParkBottomBar(navController = navController)
     },
     content = { innerPadding ->
       NavHost(
         navController = navController,
         startDestination = NavItem.Parking.route,
-        modifier = modifier.padding(innerPadding)
-      ) {
-        composable(NavItem.Parking.route) {
-          ParkingListScreen(viewModel)
+        modifier = modifier.padding(innerPadding),
+        builder = {
+          composable(NavItem.Parking.route) {
+            ParkingListScreen()
+          }
+          composable(NavItem.Chargers.route) {
+            ChargerListScreen()
+          }
         }
-        composable(NavItem.Chargers.route) {
-          ChargerListScreen(viewModel)
-        }
-      }
+      )
     }
   )
 }
