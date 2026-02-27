@@ -1,4 +1,4 @@
-package fyi.tono.stroppark.internal.ui.navigation
+package fyi.tono.stroppark.core.ui.navigation
 
 
 import androidx.compose.material.icons.Icons

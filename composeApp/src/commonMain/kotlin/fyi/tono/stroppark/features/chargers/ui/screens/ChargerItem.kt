@@ -1,4 +1,4 @@
-package fyi.tono.stroppark.internal.features.chargers.ui.screens
+package fyi.tono.stroppark.features.chargers.ui.screens
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EvStation

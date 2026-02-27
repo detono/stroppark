@@ -1,4 +1,4 @@
-package fyi.tono.stroppark
+package fyi.tono.stroppark.core.utils
 
 interface Platform {
     val name: String

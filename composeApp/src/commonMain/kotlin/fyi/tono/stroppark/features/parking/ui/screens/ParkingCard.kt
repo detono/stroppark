@@ -1,4 +1,4 @@
-package fyi.tono.stroppark.internal.features.parking.ui.screens
+package fyi.tono.stroppark.features.parking.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

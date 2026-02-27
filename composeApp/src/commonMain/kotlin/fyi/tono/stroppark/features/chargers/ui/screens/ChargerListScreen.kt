@@ -1,4 +1,4 @@
-package fyi.tono.stroppark.internal.features.chargers.ui.screens
+package fyi.tono.stroppark.features.chargers.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ChargerListScreen(viewModel: MainViewModel) {
-  // Assuming you've added a chargersState to your ViewModel
+  // Assuming you've added FeatureViewModel.kt chargersState to your ViewModel
   val chargerState by viewModel.chargerState.collectAsState()
 
   Column(modifier = Modifier.fillMaxSize()) {

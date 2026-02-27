@@ -1,4 +1,4 @@
-package fyi.tono.stroppark
+package fyi.tono.stroppark.core.utils
 
 import platform.UIKit.UIDevice
 
