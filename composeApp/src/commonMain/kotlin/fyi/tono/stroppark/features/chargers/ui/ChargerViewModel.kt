@@ -1,4 +1,6 @@
 package fyi.tono.stroppark.features.chargers.ui
 
-class ChargerViewModel {
+import androidx.lifecycle.ViewModel
+
+class ChargerViewModel: ViewModel() {
 }

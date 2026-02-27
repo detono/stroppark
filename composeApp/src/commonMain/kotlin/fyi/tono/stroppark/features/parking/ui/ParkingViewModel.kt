@@ -1,4 +1,6 @@
 package fyi.tono.stroppark.features.parking.ui
 
-class ParkingViewModel {
+import androidx.lifecycle.ViewModel
+
+class ParkingViewModel: ViewModel() {
 }

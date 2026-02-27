@@ -14,7 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import fyi.tono.stroppark.core.ui.navigation.AppNavigation
+import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
+import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 
 import stroppark.composeapp.generated.resources.Res
 import stroppark.composeapp.generated.resources.compose_multiplatform
@@ -22,6 +26,17 @@ import stroppark.composeapp.generated.resources.compose_multiplatform
 @Composable
 @Preview
 fun App() {
+    MaterialTheme {
+        // Koin automatically finds the right ViewModel and its dependencies
+        val parkingViewModel: ParkingViewModel = koinViewModel()
+        val chargerViewModel: ChargerViewModel = koinViewModel()
+
+        AppNavigation(
+            parkingViewModel = parkingViewModel,
+            chargerViewModel = chargerViewModel
+        )
+    }
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
