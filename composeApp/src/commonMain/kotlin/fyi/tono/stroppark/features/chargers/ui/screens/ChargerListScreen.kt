@@ -1,23 +1,26 @@
 package fyi.tono.stroppark.features.chargers.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import fyi.tono.stroppark.features.chargers.ui.ChargerUiState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
+import fyi.tono.stroppark.features.chargers.ui.components.ChargerList
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,27 +28,54 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
   val uiState by viewModel.uiState.collectAsState()
 
-  when (uiState) {
-    ChargerUiState.Loading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-    is ChargerUiState.Error -> {
-      val error = (uiState as ChargerUiState.Error).message
-      Text("Error: $error")
-    }
-    is ChargerUiState.Success -> {
-      val chargers = (uiState as ChargerUiState.Success).chargers
-      Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text("EV Charging Points") })
+  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    viewModel.onLifecycleEvent(isForeground = true)
+  }
+  LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+    viewModel.onLifecycleEvent(isForeground = false)
+  }
 
-        LazyColumn(
-          contentPadding = PaddingValues(16.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-          content = {
-            items(chargers) { charger ->
-              ChargerItem(charger)
-            }
-          }
-        )
+  LaunchedEffect(Unit) {
+    viewModel.fetchData()
+  }
+
+  PullToRefreshBox(
+    modifier = Modifier.fillMaxSize(),
+    isRefreshing = uiState.isLoading,
+    onRefresh = {
+      viewModel.fetchData(isSilent = false)
+    },
+    content = {
+      when {
+        uiState.isLoading && uiState.chargers.isEmpty() -> {
+          CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+
+        uiState.errorMessage != null && uiState.chargers.isEmpty() -> {
+          Text(uiState.errorMessage!!, modifier = Modifier.align(Alignment.Center))
+        }
+
+        else -> {
+          ChargerList(uiState.chargers)
+        }
+      }
+
+      if (uiState.errorMessage != null && uiState.chargers.isNotEmpty()) {
+        Surface(
+          color = MaterialTheme.colorScheme.errorContainer,
+          modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.BottomCenter)
+        ) {
+          Text(
+            text = uiState.errorMessage!!,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            modifier = Modifier.padding(8.dp),
+            textAlign = TextAlign.Center
+          )
+        }
       }
     }
-  }
+  )
 }

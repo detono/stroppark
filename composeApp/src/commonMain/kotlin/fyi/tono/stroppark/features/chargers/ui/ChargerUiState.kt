@@ -1,9 +1,11 @@
 package fyi.tono.stroppark.features.chargers.ui
 
 import fyi.tono.stroppark.features.chargers.domain.ChargerPoint
+import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 
-sealed interface ChargerUiState {
-  object Loading: ChargerUiState
-  data class Success(val chargers: List<ChargerPoint>) : ChargerUiState
-  data class Error(val message: String) : ChargerUiState
-}
+data class ChargerUiState (
+  val isLoading: Boolean = false,
+  val chargers: List<ChargerPoint> = emptyList(),
+  val errorMessage: String? = null,
+)
+

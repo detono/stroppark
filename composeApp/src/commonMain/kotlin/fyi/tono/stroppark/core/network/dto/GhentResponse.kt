@@ -1,10 +1,10 @@
-package fyi.tono.stroppark.features.parking.data
+package fyi.tono.stroppark.core.network.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ParkingResponse(
+class  GhentResponse<T: Any>(
   @SerialName("total_count") val totalCount: Int? = null,
-  val results: List<ParkingDto>
+  val results: List<T>
 )

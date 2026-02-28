@@ -53,6 +53,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.compose.navigation)
+            implementation(libs.kotlinx.datetime)
 
             //Ktor
             implementation(ktorLibs.client.core)
@@ -67,7 +68,9 @@ kotlin {
             //Logging (not mandatory but otherwise gives annoying non-crashing error in log)
             implementation(libs.slf4j.simple)
 
-            implementation(libs.kotlinx.datetime)
+            //Logger
+            implementation(libs.kermit)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -1,5 +1,6 @@
 package fyi.tono.stroppark.features.parking.data
 
+import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -33,7 +34,7 @@ data class ParkingDto(
   val occupancyTrend: String,
   @SerialName("locationanddimension")
   val locationAndDimension: String,
-  val location: LatLonDto? = null,
+  val location: GhentCoordinatesDto? = null,
   val text: String? = null,
   @SerialName("categorie")
   val category: String,

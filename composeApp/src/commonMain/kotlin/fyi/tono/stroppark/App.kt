@@ -30,7 +30,7 @@ fun App() {
 
         AppNavigation()
     }
-
+/*
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
@@ -54,5 +54,5 @@ fun App() {
                 }
             }
         }
-    }
+    }*/
 }
