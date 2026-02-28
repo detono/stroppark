@@ -4,33 +4,48 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import fyi.tono.stroppark.features.chargers.ui.ChargerUiState
 import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
-  // Assuming you've added FeatureViewModel.kt chargersState to your ViewModel
-  val chargerState by viewModel.chargerState.collectAsState()
+  val uiState by viewModel.uiState.collectAsState()
 
-  Column(modifier = Modifier.fillMaxSize()) {
-    TopAppBar(title = { Text("EV Charging Points") })
+  when (uiState) {
+    ChargerUiState.Loading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+    is ChargerUiState.Error -> {
+      val error = (uiState as ChargerUiState.Error).message
+      Text("Error: $error")
+    }
+    is ChargerUiState.Success -> {
+      val chargers = (uiState as ChargerUiState.Success).chargers
+      Column(modifier = Modifier.fillMaxSize()) {
+        TopAppBar(title = { Text("EV Charging Points") })
 
-    LazyColumn(
-      contentPadding = PaddingValues(16.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-      content = {
-        items(chargerState.chargers) { charger ->
-          ChargerItem(charger)
-        }
+        LazyColumn(
+          contentPadding = PaddingValues(16.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+          content = {
+            items(chargers) { charger ->
+              ChargerItem(charger)
+            }
+          }
+        )
       }
-    )
+    }
   }
 }

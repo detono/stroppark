@@ -27,14 +27,8 @@ import stroppark.composeapp.generated.resources.compose_multiplatform
 @Preview
 fun App() {
     MaterialTheme {
-        // Koin automatically finds the right ViewModel and its dependencies
-        val parkingViewModel: ParkingViewModel = koinViewModel()
-        val chargerViewModel: ChargerViewModel = koinViewModel()
 
-        AppNavigation(
-            parkingViewModel = parkingViewModel,
-            chargerViewModel = chargerViewModel
-        )
+        AppNavigation()
     }
 
     MaterialTheme {

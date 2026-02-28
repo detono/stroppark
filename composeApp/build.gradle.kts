@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -52,7 +53,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.compose.navigation)
-            
+
             //Ktor
             implementation(ktorLibs.client.core)
             implementation(ktorLibs.client.contentNegotiation)
@@ -63,10 +64,15 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
 
+            //Logging (not mandatory but otherwise gives annoying non-crashing error in log)
+            implementation(libs.slf4j.simple)
 
+            implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(ktorLibs.client.mock)
         }
     }
 }

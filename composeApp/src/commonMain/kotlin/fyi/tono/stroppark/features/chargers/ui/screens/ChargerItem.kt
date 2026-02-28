@@ -6,10 +6,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.BlendMode.Companion.Color
+import androidx.compose.ui.graphics.Color
+import fyi.tono.stroppark.features.chargers.domain.ChargerPoint
 
 @Composable
-fun ChargerItem(charger: ChargerData) {
+fun ChargerItem(charger: ChargerPoint) {
   ListItem(
     headlineContent = { Text(charger.address) },
     supportingContent = { Text("${charger.status} • ${charger.type}") },
@@ -21,7 +22,7 @@ fun ChargerItem(charger: ChargerData) {
       )
     },
     trailingContent = {
-      Text("${charger.numberOfPlugs} plugs")
+      Text("${charger.powerKw} kWh")
     }
   )
 }
