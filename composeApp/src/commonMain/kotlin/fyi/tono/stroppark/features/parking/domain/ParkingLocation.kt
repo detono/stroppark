@@ -18,7 +18,8 @@ data class ParkingLocation(
   val open: Boolean = false,
   val lez: Boolean = false,
   val free: Boolean = false,
-  val lastUpdated: Instant = Clock.System.now()
+  val lastUpdated: Instant = Clock.System.now(),
+  val distanceKm: Double? = null
 ) {
   val occupancyProgress: Float = if (totalCapacity > 0)
     (totalCapacity - availableCapacity).toFloat() / totalCapacity

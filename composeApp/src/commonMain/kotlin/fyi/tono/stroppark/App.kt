@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import fyi.tono.stroppark.core.ui.navigation.AppNavigation
+import fyi.tono.stroppark.core.ui.theme.StropParkTheme
 import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
 import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -26,8 +27,7 @@ import stroppark.composeapp.generated.resources.compose_multiplatform
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
-
+    StropParkTheme {
         AppNavigation()
     }
 /*

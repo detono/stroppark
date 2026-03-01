@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import fyi.tono.stroppark.core.ui.theme.GhentYellow
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 
 @Composable
@@ -33,21 +35,34 @@ fun ParkingCard(parking: ParkingLocation) {
               text = parking.name,
               style = MaterialTheme.typography.titleMedium
             )
+
+            val availabilityColor = when {
+              parking.availableCapacity > 50 -> Color(0xFF4CAF50)
+              parking.availableCapacity > 10 -> GhentYellow
+              else -> MaterialTheme.colorScheme.error
+            }
+
             Text(
               text = "${parking.availableCapacity} spaces available",
-              style = MaterialTheme.typography.bodyMedium,
-              color = if (parking.availableCapacity > 10) Color.Green else Color.Red
+              color = availabilityColor,
+              style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
             )
           }
-          // Occupancy Percentage Circle
-          CircularProgressIndicator(
-            progress = { parking.availableCapacity.toFloat() / parking.totalCapacity },
-            modifier = Modifier.size(40.dp),
-            color = ProgressIndicatorDefaults.circularColor,
-            strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth,
-            trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
-            strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-          )
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(
+              progress = { parking.availableCapacity.toFloat() / parking.totalCapacity },
+              modifier = Modifier.size(40.dp),
+              color = ProgressIndicatorDefaults.circularColor,
+              strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth,
+              trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
+              strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+            )
+            Text(
+              modifier = Modifier.padding(top = 8.dp),
+              text = "${parking.availableCapacity}/${parking.totalCapacity}",
+              style = MaterialTheme.typography.labelSmall
+            )
+          }
         }
       )
     }

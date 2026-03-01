@@ -1,13 +1,16 @@
 package fyi.tono.stroppark.features.parking.ui
 
-import fyi.tono.stroppark.BaseViewModelTest
+import fyi.tono.stroppark.core.location.LocationService
+import fyi.tono.stroppark.core.location.LocationServiceImpl
+import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
+import fyi.tono.stroppark.features.core.ui.BaseViewModelTests
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 
 class FakeParkingRepository : ParkingRepository {
@@ -19,22 +22,29 @@ class FakeParkingRepository : ParkingRepository {
     return mockData
   }
 }
+class FakeLocationService : LocationService {
+  var mockLocation: GhentCoordinatesDto? = GhentCoordinatesDto(51.0543, 3.7174)
 
-class ParkingViewModelTests: BaseViewModelTest() {
+  override suspend fun getCurrentLocation(): GhentCoordinatesDto? = mockLocation
+}
+
+class ParkingViewModelTests: BaseViewModelTests() {
   private lateinit var viewModel: ParkingViewModel
   private lateinit var fakeRepository: FakeParkingRepository
+  private lateinit var fakeLocationService: FakeLocationService
 
   @BeforeTest
   fun setup() {
     fakeRepository = FakeParkingRepository()
-    viewModel = ParkingViewModel(fakeRepository)
+    fakeLocationService = FakeLocationService()
+    viewModel = ParkingViewModel(fakeRepository, fakeLocationService)
   }
 
   @Test
   fun `initial state should be Loading`() = runTest {
     assertEquals(
-      ParkingUiState.Loading,
-      viewModel.uiState.value
+      true,
+      viewModel.uiState.value.isLoading
     )
   }
 
@@ -57,7 +67,7 @@ class ParkingViewModelTests: BaseViewModelTest() {
 
     // 3. Assert
     val currentState = viewModel.uiState.value
-    assertTrue(currentState is ParkingUiState.Success)
+    assertEquals(false, currentState.isLoading)
     assertEquals(1, currentState.parkingSpots.size)
     assertEquals("Vrijdagmarkt", currentState.parkingSpots.first().name)
   }
@@ -72,7 +82,7 @@ class ParkingViewModelTests: BaseViewModelTest() {
 
     // 3. Assert
     val currentState = viewModel.uiState.value
-    assertTrue(currentState is ParkingUiState.Error)
-    assertEquals("Network Fail", currentState.message)
+    assertEquals(false, currentState.isLoading)
+    assertContains( currentState.errorMessage ?: "", "Could not update")
   }
 }

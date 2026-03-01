@@ -1,5 +1,6 @@
 package fyi.tono.stroppark.features.parking.data
 
+import fyi.tono.stroppark.features.core.data.BaseRepositoryImplTests
 import fyi.tono.stroppark.features.parking.domain.ParkingType
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -18,13 +19,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
-class ParkingRepositoryImplTest {
-  private val json = Json {
-    ignoreUnknownKeys = true
-    prettyPrint = true
-    isLenient = true
-  }
-
+class ParkingRepositoryImplTests: BaseRepositoryImplTests() {
   private val GHENT_PARKING_JSON = """
     {
       "total_count": 13,
@@ -128,24 +123,6 @@ class ParkingRepositoryImplTest {
     """.trimIndent()
   }
 
-  private fun createClientWithResponse(
-    content: String,
-    statusCode: HttpStatusCode
-  ): HttpClient {
-    val mockEngine = MockEngine { _ ->
-      respond(
-        content = ByteReadChannel(content),
-        status = statusCode,
-        headers = headersOf(HttpHeaders.ContentType, "application/json")
-      )
-    }
-
-    return HttpClient(mockEngine) {
-      install(ContentNegotiation) {
-        json(json)
-      }
-    }
-  }
   //endregion
 
   @Test

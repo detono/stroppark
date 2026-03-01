@@ -56,7 +56,7 @@ class ChargerRepositoryImpl(
       powerKw = kw,
       lat = geoPoint2d.lat,
       lon = geoPoint2d.lon,
-      status = status
+      status = status,
     )
   }
 }

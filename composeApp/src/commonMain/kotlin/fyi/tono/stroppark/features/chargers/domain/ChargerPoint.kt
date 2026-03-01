@@ -8,7 +8,8 @@ data class ChargerPoint(
   val powerKw: Int,
   val lat: Double,
   val lon: Double,
-  val status: String
+  val status: String,
+  val distanceKm: Double? = null
 ) {
   val isAvailable: Boolean = status.contains("In dienst", ignoreCase = true)
 }

@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class ChargerViewModel(
   private val repository: ChargerRepository
 ): ViewModel() {
-  private val _uiState = MutableStateFlow<ChargerUiState>(ChargerUiState(isLoading = false))
+  private val _uiState = MutableStateFlow(ChargerUiState(isLoading = true))
   val uiState = _uiState.asStateFlow()
 
 

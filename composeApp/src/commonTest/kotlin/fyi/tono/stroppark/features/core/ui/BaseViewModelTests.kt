@@ -1,4 +1,4 @@
-package fyi.tono.stroppark
+package fyi.tono.stroppark.features.core.ui
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -9,7 +9,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
-abstract class BaseViewModelTest {
+abstract class BaseViewModelTests {
   val testDispatcher = UnconfinedTestDispatcher()
 
   @BeforeTest

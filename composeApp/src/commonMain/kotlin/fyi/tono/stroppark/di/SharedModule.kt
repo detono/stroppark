@@ -9,6 +9,7 @@ import fyi.tono.stroppark.features.parking.data.ParkingRepositoryImpl
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import kotlinx.serialization.json.Json
+import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
@@ -47,15 +48,18 @@ val dataModule = module {
   }
 }
 
+expect val platformModule: Module
+
 val featureModule = module {
   // ViewModels (Using factory because we want a fresh one per screen)
-  factory { ParkingViewModel(get()) }
+  factoryOf(::ParkingViewModel)
   factoryOf(::ChargerViewModel)
 }
 
 val sharedModules = listOf(
   networkModule,
   loggerModule,
+  platformModule,
   dataModule,
   featureModule,
 )
