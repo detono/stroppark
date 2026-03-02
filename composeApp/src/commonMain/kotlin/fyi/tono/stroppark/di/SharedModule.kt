@@ -1,6 +1,9 @@
 package fyi.tono.stroppark.di
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import co.touchlab.kermit.Logger
+import fyi.tono.stroppark.core.location.LocationPermissionService
+import fyi.tono.stroppark.core.location.MokoLocationPermissionService
 import fyi.tono.stroppark.core.network.createHttpClient
 import fyi.tono.stroppark.features.chargers.data.ChargerRepositoryImpl
 import fyi.tono.stroppark.features.chargers.domain.ChargerRepository
@@ -15,7 +18,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val networkModule = module {
-  single {
+single {
     Json {
       ignoreUnknownKeys = true
       isLenient = true
@@ -56,10 +59,15 @@ val featureModule = module {
   factoryOf(::ChargerViewModel)
 }
 
+val locationModule = module {
+  single<LocationPermissionService> { MokoLocationPermissionService(get()) }
+}
+
 val sharedModules = listOf(
   networkModule,
   loggerModule,
   platformModule,
   dataModule,
+  locationModule,
   featureModule,
 )

@@ -2,6 +2,8 @@ package fyi.tono.stroppark.features.parking.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fyi.tono.stroppark.core.location.LocationPermissionService
+import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.core.location.LocationService
 import fyi.tono.stroppark.core.location.LocationUtils
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
@@ -9,17 +11,27 @@ import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class ParkingViewModel(
   private val repository: ParkingRepository,
-  private val locationService: LocationService
+  private val locationService: LocationService,
+  private val locationPermission: LocationPermissionService
 ): ViewModel() {
   private val _uiState = MutableStateFlow(ParkingUiState(isLoading = true))
   val uiState = _uiState.asStateFlow()
+
+  val permissionState = locationPermission.state
+    .stateIn(
+      viewModelScope,
+      SharingStarted.Eagerly,
+      LocationPermissionState.NotDetermined
+    )
 
   private var pollingJob: Job? = null
 
@@ -45,6 +57,11 @@ class ParkingViewModel(
         }
       }
       ParkingAction.Refresh -> fetchData()
+      ParkingAction.RequestLocationPermission -> {
+        viewModelScope.launch {
+          locationPermission.requestPermission()
+        }
+      }
     }
   }
 
@@ -75,8 +92,6 @@ class ParkingViewModel(
           } else null
           spot.copy(distanceKm = distance)
         }.sortedBy { it.distanceKm ?: Double.MAX_VALUE } // The "Closest First" logic!
-
-
 
         _uiState.update {
           it.copy(

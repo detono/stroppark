@@ -1,32 +1,20 @@
 package fyi.tono.stroppark
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import dev.icerock.moko.permissions.PermissionsController
+import dev.icerock.moko.permissions.compose.BindEffect
 import fyi.tono.stroppark.core.ui.navigation.AppNavigation
 import fyi.tono.stroppark.core.ui.theme.StropParkTheme
-import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
-import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
-import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.viewmodel.koinViewModel
-
-import stroppark.composeapp.generated.resources.Res
-import stroppark.composeapp.generated.resources.compose_multiplatform
+import org.koin.compose.koinInject
 
 @Composable
 @Preview
 fun App() {
+    val permissionsController = koinInject<PermissionsController>()
+    BindEffect(permissionsController)
+
     StropParkTheme {
         AppNavigation()
     }

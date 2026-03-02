@@ -74,6 +74,9 @@ kotlin {
             //Logger
             implementation(libs.kermit)
 
+            //Moko
+            implementation(libs.permissions.location)
+            implementation(libs.permissions.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
