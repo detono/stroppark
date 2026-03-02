@@ -7,6 +7,12 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -60,8 +66,10 @@ kotlin {
 
             //Ktor
             implementation(ktorLibs.client.core)
+            implementation(ktorLibs.client.logging)
             implementation(ktorLibs.client.contentNegotiation)
             implementation(ktorLibs.serialization.kotlinx.json)
+
 
             //Koin
             implementation(libs.koin.core)
@@ -77,6 +85,10 @@ kotlin {
             //Moko
             implementation(libs.permissions.location)
             implementation(libs.permissions.compose)
+
+            //Room
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -115,5 +127,9 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }
 

@@ -6,13 +6,14 @@ import fyi.tono.stroppark.core.location.LocationPermissionService
 import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.core.location.LocationService
 import fyi.tono.stroppark.core.location.LocationUtils
-import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -34,6 +35,29 @@ class ParkingViewModel(
     )
 
   private var pollingJob: Job? = null
+
+  init {
+    repository.getParkingFlow().onEach { spots ->
+      _uiState.update { currentState ->
+        val mappedSpots = spots.map { spot ->
+          val userLoc = locationService.getCurrentLocation()
+          val distance = if (userLoc != null && spot.latitude != null && spot.longitude != null) {
+            LocationUtils.calculateDistance(
+              userLoc.lat, userLoc.lon,
+              spot.latitude, spot.longitude
+            )
+          } else null
+          spot.copy(distanceKm = distance)
+        }.sortedBy { it.distanceKm ?: Double.MAX_VALUE } // The "Closest First" logic!
+
+        currentState.copy(
+          parkingSpots = mappedSpots,
+          isLoading = false
+        )
+      }
+    }
+    .launchIn(viewModelScope)
+  }
 
   fun onLifecycleEvent(isForeground: Boolean) {
     if (isForeground) {
@@ -79,35 +103,22 @@ class ParkingViewModel(
     viewModelScope.launch {
       if (!isSilent) _uiState.update { it.copy(isLoading = true) }
 
-      try {
-        val userLoc = locationService.getCurrentLocation()
-        val spots = repository.getParkingOccupancy()
-
-        val mappedSpots = spots.map { spot ->
-          val distance = if (userLoc != null && spot.latitude != null && spot.longitude != null) {
-            LocationUtils.calculateDistance(
-              userLoc.lat, userLoc.lon,
-              spot.latitude, spot.longitude
+      repository.refreshParkingOccupancy().fold(
+        onSuccess = {
+          _uiState.update {
+            it.copy(
+              isLoading = false,
+              errorMessage = null
             )
-          } else null
-          spot.copy(distanceKm = distance)
-        }.sortedBy { it.distanceKm ?: Double.MAX_VALUE } // The "Closest First" logic!
-
-        _uiState.update {
-          it.copy(
-            parkingSpots = mappedSpots,
+          }
+        },
+        onFailure = { throwable ->
+          _uiState.update { it.copy(
             isLoading = false,
-            errorMessage = null
-          )
+            errorMessage = throwable.message ?: "An unexpected error occurred"
+          )}
         }
-      } catch (e: Exception) {
-        _uiState.update {
-          it.copy(
-            isLoading = false,
-            errorMessage = "Could not update: ${e.message}"
-          )
-        }
-      }
+      )
     }
   }
 }

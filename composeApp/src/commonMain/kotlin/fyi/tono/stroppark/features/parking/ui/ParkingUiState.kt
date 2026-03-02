@@ -4,7 +4,7 @@ import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 
 data class ParkingUiState(
-  val isLoading: Boolean = false,
+  val isLoading: Boolean = true,
   val parkingSpots: List<ParkingLocation> = emptyList(),
   val errorMessage: String? = null,
   val activeFilters: Set<ParkingFilter> = setOf()

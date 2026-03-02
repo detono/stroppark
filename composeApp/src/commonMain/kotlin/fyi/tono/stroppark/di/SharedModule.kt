@@ -2,6 +2,8 @@ package fyi.tono.stroppark.di
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.touchlab.kermit.Logger
+import fyi.tono.stroppark.core.database.StropParkDatabase
+import fyi.tono.stroppark.core.database.getRoomDatabase
 import fyi.tono.stroppark.core.location.LocationPermissionService
 import fyi.tono.stroppark.core.location.MokoLocationPermissionService
 import fyi.tono.stroppark.core.network.createHttpClient
@@ -14,7 +16,9 @@ import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.parameter.parametersOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val networkModule = module {
@@ -40,6 +44,7 @@ val dataModule = module {
       logger = get { parametersOf("ParkingRepositoryImpl") },
       httpClient = get(),
       json = get(),
+      dao = get()
     )
   }
 
@@ -62,8 +67,18 @@ val featureModule = module {
 val locationModule = module {
   single<LocationPermissionService> { MokoLocationPermissionService(get()) }
 }
+expect val platformDatabaseModule: Module
+
+val dbModule = module {
+  single<StropParkDatabase> {
+    getRoomDatabase(get())
+  }
+  single { get<StropParkDatabase>().parkingDao }
+}
 
 val sharedModules = listOf(
+  platformDatabaseModule,
+  dbModule,
   networkModule,
   loggerModule,
   platformModule,

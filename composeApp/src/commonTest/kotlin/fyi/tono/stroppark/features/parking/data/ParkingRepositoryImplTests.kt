@@ -1,23 +1,17 @@
 package fyi.tono.stroppark.features.parking.data
 
+import fyi.tono.stroppark.fakes.FakeParkingDao
 import fyi.tono.stroppark.features.core.data.BaseRepositoryImplTests
 import fyi.tono.stroppark.features.parking.domain.ParkingType
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.time.Instant
+
 
 class ParkingRepositoryImplTests: BaseRepositoryImplTests() {
   private val GHENT_PARKING_JSON = """
@@ -122,223 +116,143 @@ class ParkingRepositoryImplTests: BaseRepositoryImplTests() {
       }
     """.trimIndent()
   }
-
   //endregion
 
-  @Test
-  fun `getParkingOccupancy returns mapped data on success`() = runTest {
-    val testClient = createClientWithResponse(
-      GHENT_PARKING_JSON,
-      HttpStatusCode.OK
-    )
-
-    val repo = ParkingRepositoryImpl(testClient, json)
-
-    val result = repo.getParkingOccupancy()
-    assertTrue(result.isNotEmpty())
+  private lateinit var fakeParkingDao: FakeParkingDao
+  @BeforeTest
+  fun setup() {
+    fakeParkingDao = FakeParkingDao()
   }
 
   @Test
   fun `getParkingOccupancy maps correctly on success`() = runTest {
-    val testClient = createClientWithResponse(
-      GHENT_PARKING_JSON,
-      HttpStatusCode.OK
-    )
+    val testClient = createClientWithResponse(GHENT_PARKING_JSON, HttpStatusCode.OK)
+    val repo = ParkingRepositoryImpl(testClient, json, dao = fakeParkingDao)
 
-    val repo = ParkingRepositoryImpl(testClient, json)
+    repo.refreshParkingOccupancy()
 
-    val result = repo.getParkingOccupancy()
-    assertEquals(2, result.size)
-    result.firstOrNull()?.let { first ->
+    val results = fakeParkingDao.getInsertedLocations()
+    assertEquals(2, results.size)
+
+    results.firstOrNull()?.let { first ->
       assertEquals("Savaanstraat", first.name)
       assertEquals(510, first.totalCapacity)
       assertEquals(261, first.availableCapacity)
-      assertEquals(ParkingType.CAR_PARK, first.type)
+      assertEquals(ParkingType.CAR_PARK.type, first.type)
       assertEquals("24/7", first.openingDescription)
       assertEquals(true, first.lez)
       assertEquals(true, first.open)
       assertEquals(false, first.free)
-      assertEquals(3.7234627726667133, first.longitude)
-      assertEquals(51.04877362543108, first.latitude)
-      assertEquals("https://stad.gent/nl/mobiliteit-openbare-werken/parkeren/parkings-gent/parking-savaanstraat", first.url)
+      assertEquals(3.7234627726667133, first.lon)
+      assertEquals(51.04877362543108, first.lat)
       assertEquals("Mobiliteitsbedrijf Gent", first.operator)
-      assertEquals("Tel.: 09 266 29 40", first.phone)
-      assertEquals(Instant.parse("2026-02-27T21:37:23+01:00"), first.lastUpdated)
     }
 
-    result.lastOrNull()?.let { last ->
+    results.lastOrNull()?.let { last ->
       assertEquals("Tolhuis", last.name)
-      assertEquals(3.724968367281895, last.longitude)
-      assertEquals(51.0637023559265, last.latitude)
-      assertEquals(ParkingType.OFF_STREET, last.type)
+      assertEquals(3.724968367281895, last.lon)
+      assertEquals(51.0637023559265, last.lat)
+      assertEquals(ParkingType.OFF_STREET.type, last.type)
     }
   }
 
   @Test
-  fun `getParkingOccupancy returns empty list on server error`() = runTest {
+  fun `refreshParkingOccupancy returns failure on server error`() = runTest {
     val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        "{}",
-        HttpStatusCode.InternalServerError
-      ),
-      json
+      createClientWithResponse("{}", HttpStatusCode.InternalServerError),
+      json, dao = fakeParkingDao
     )
-    val result = repo.getParkingOccupancy()
-    assertTrue(result.isEmpty())
+    val result = repo.refreshParkingOccupancy()
+    assertTrue(result.isFailure)
   }
 
   @Test
-  fun `getParkingOccupancy returns empty list on malformed JSON`() = runTest {
+  fun `refreshParkingOccupancy returns failure on malformed JSON`() = runTest {
     val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        "not json at all",
-        HttpStatusCode.OK
-      ),
-      json
+      createClientWithResponse("not json at all", HttpStatusCode.OK),
+      json, dao = fakeParkingDao
     )
-    val result = repo.getParkingOccupancy()
-    assertTrue(result.isEmpty())
+    val result = repo.refreshParkingOccupancy()
+    assertTrue(result.isFailure)
   }
 
   @Test
-  fun `getParkingOccupancy returns empty list when results array is empty`() = runTest {
+  fun `refreshParkingOccupancy with empty results inserts nothing`() = runTest {
     val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        """{ "total_count": 0, "results": [] }""",
-        HttpStatusCode.OK
-      ),
-      json
+      createClientWithResponse("""{ "total_count": 0, "results": [] }""", HttpStatusCode.OK),
+      json, dao = fakeParkingDao
     )
-    val result = repo.getParkingOccupancy()
-    assertTrue(result.isEmpty())
+    repo.refreshParkingOccupancy()
+    assertTrue(fakeParkingDao.getInsertedLocations().isEmpty())
   }
 
   @Test
-  fun `getParkingOccupancy parking outside LEZ maps lez to false`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(category = "parking buiten LEZ"),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    val result = repo.getParkingOccupancy()
-    assertEquals(false, result.first().lez)
+  fun `parking outside LEZ maps lez to false`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(category = "parking buiten LEZ"), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertEquals(false, fakeParkingDao.getInsertedLocations().first().lez)
   }
 
   @Test
-  fun `getParkingOccupancy parking inside LEZ maps lez to true`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(category = "parking in LEZ"),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    val result = repo.getParkingOccupancy()
-    assertEquals(true, result.first().lez)
+  fun `parking inside LEZ maps lez to true`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(category = "parking in LEZ"), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertEquals(true, fakeParkingDao.getInsertedLocations().first().lez)
   }
 
   @Test
-  fun `getParkingOccupancy LEZ check is case insensitive`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(category = "parking BUITEN LEZ"),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    val result = repo.getParkingOccupancy()
-    assertEquals(false, result.first().lez)
-  }
-
-
-  @Test
-  fun `getParkingOccupancy isOpenNow 0 maps open to false`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(isOpenNow = 0),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    assertEquals(false, repo.getParkingOccupancy().first().open)
+  fun `LEZ check is case insensitive`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(category = "parking BUITEN LEZ"), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertEquals(false, fakeParkingDao.getInsertedLocations().first().lez)
   }
 
   @Test
-  fun `getParkingOccupancy freeParking 1 maps free to true`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(freeParking = 1),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    assertEquals(true, repo.getParkingOccupancy().first().free)
+  fun `isOpenNow 0 maps open to false`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(isOpenNow = 0), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertEquals(false, fakeParkingDao.getInsertedLocations().first().open)
   }
 
   @Test
-  fun `getParkingOccupancy offStreetParkingGround type maps correctly`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(type = "offStreetParkingGround"),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    assertEquals(ParkingType.OFF_STREET, repo.getParkingOccupancy().first().type)
+  fun `freeParking 1 maps free to true`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(freeParking = 1), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertEquals(true, fakeParkingDao.getInsertedLocations().first().free)
   }
 
   @Test
-  fun `getParkingOccupancy unknown type maps to null`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(type = "someFutureType"),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-
-    assertNull(repo.getParkingOccupancy().first().type)
+  fun `offStreetParkingGround type maps correctly`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(type = "offStreetParkingGround"), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertEquals(ParkingType.OFF_STREET.type, fakeParkingDao.getInsertedLocations().first().type)
   }
 
   @Test
-  fun `getParkingOccupancy missing location maps lat and lon to null`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(includeLocation = false),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    val result = repo.getParkingOccupancy().first()
-    assertNull(result.latitude)
-    assertNull(result.longitude)
+  fun `unknown type maps to null`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(type = "someFutureType"), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    assertNull(fakeParkingDao.getInsertedLocations().first().type)
   }
 
   @Test
-  fun `getParkingOccupancy malformed locationAndDimension does not crash and phone is null`() = runTest {
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(locationAndDimension = "}{invalid json"),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    val result = repo.getParkingOccupancy().first()
-    assertNull(result.phone)
+  fun `missing location block maps lat and lon to null`() = runTest {
+    val repo = ParkingRepositoryImpl(createClientWithResponse(parkingJson(includeLocation = false), HttpStatusCode.OK), json, dao = fakeParkingDao)
+    repo.refreshParkingOccupancy()
+    val result = fakeParkingDao.getInsertedLocations().first()
+    assertNull(result.lat)
+    assertNull(result.lon)
   }
 
   @Test
-  fun `getParkingOccupancy locationAndDimension without phone maps phone to null`() = runTest {
-    val dimensionWithoutPhone = """{"specificAccessInformation": ["inrit"], "level": "0", "coordinatesForDisplay": {"latitude": 51.0, "longitude": 3.7}}"""
-    val repo = ParkingRepositoryImpl(
-      createClientWithResponse(
-        parkingJson(locationAndDimension = dimensionWithoutPhone),
-        HttpStatusCode.OK
-      ),
-      json
-    )
-    assertNull(repo.getParkingOccupancy().first().phone)
+  fun `getParkingFlow emits domain models from dao`() = runTest {
+    val testClient = createClientWithResponse(GHENT_PARKING_JSON, HttpStatusCode.OK)
+    val repo = ParkingRepositoryImpl(testClient, json, dao = fakeParkingDao)
+
+    repo.refreshParkingOccupancy()
+
+    val emitted = repo.getParkingFlow().first()
+    assertEquals(2, emitted.size)
+    assertEquals("Savaanstraat", emitted.first().name)
   }
 }
