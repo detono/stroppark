@@ -192,7 +192,7 @@ fun ParkingCard(
         }
 
         // Distance from user
-        parking.distanceKm?.let { km ->
+        /*parking.distanceKm?.let { km ->
           val whole = km.toInt()
           val decimal = ((km - whole) * 10).toInt()
 
@@ -202,7 +202,7 @@ fun ParkingCard(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
-        }
+        }*/
       }
 
       /*Row(
