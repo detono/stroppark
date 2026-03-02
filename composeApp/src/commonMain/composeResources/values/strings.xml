@@ -1,0 +1,6 @@
+<resources>
+    <string name="filter_available">Available</string>
+    <string name="filter_free">Free</string>
+    <string name="filter_lez">LEZ</string>
+    <string name="filter_lez_free">Outside LEZ</string>
+</resources>

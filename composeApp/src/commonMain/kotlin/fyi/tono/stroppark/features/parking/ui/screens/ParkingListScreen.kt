@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import fyi.tono.stroppark.features.parking.ui.ParkingAction
 import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import fyi.tono.stroppark.features.parking.ui.components.ParkingList
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,7 +44,7 @@ fun ParkingListScreen(viewModel: ParkingViewModel = koinViewModel ()) {
     modifier = Modifier.fillMaxSize(),
     isRefreshing = uiState.isLoading,
     onRefresh = {
-      viewModel.fetchData(isSilent = false)
+      viewModel.onAction(ParkingAction.Refresh)
     },
     content = {
       when {
@@ -56,7 +57,10 @@ fun ParkingListScreen(viewModel: ParkingViewModel = koinViewModel ()) {
         }
 
         else -> {
-          ParkingList(uiState.parkingSpots)
+          ParkingList(
+            uiState = uiState,
+            onAction = viewModel::onAction,
+          )
         }
       }
 

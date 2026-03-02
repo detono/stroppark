@@ -1,9 +1,11 @@
 package fyi.tono.stroppark.core.location
 
+import androidx.compose.material3.Text
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -31,11 +33,16 @@ object LocationUtils {
   private fun Double.toRadians(): Double = this * PI / 180.0
 
   fun formatDistance(km: Double): String {
+    val whole = km.toInt()
+    val decimal = ((km - whole) * 10).toInt()
+
     return if (km < 1.0) {
       "${(km * 1000).toInt()}m"
     } else {
-      "test"
-      //"${"%.1f".format(km)}km"
+      "$whole.${decimal} km"
     }
   }
 }
+
+expect fun getGeoUri (lat: Double, lng: Double): String
+

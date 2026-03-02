@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fyi.tono.stroppark.core.location.LocationService
 import fyi.tono.stroppark.core.location.LocationUtils
+import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,6 +28,23 @@ class ParkingViewModel(
       startPolling()
     } else {
       pollingJob?.cancel()
+    }
+  }
+
+  fun onAction(action: ParkingAction) {
+    when (action) {
+      is ParkingAction.ToggleFilter -> {
+        _uiState.update { current ->
+          val newFilters = if (action.filter in current.activeFilters) {
+            current.activeFilters - action.filter
+          } else (
+              current.activeFilters + action.filter
+          )
+
+          current.copy(activeFilters = newFilters)
+        }
+      }
+      ParkingAction.Refresh -> fetchData()
     }
   }
 
@@ -57,6 +75,8 @@ class ParkingViewModel(
           } else null
           spot.copy(distanceKm = distance)
         }.sortedBy { it.distanceKm ?: Double.MAX_VALUE } // The "Closest First" logic!
+
+
 
         _uiState.update {
           it.copy(
