@@ -1,6 +1,12 @@
 <resources>
-    <string name="filter_available">Available</string>
-    <string name="filter_free">Free</string>
-    <string name="filter_lez">LEZ</string>
-    <string name="filter_lez_free">Outside LEZ</string>
+    <string name="parking_filter_available">Available</string>
+    <string name="parking_filter_free">Free</string>
+    <string name="parking_filter_lez">LEZ</string>
+    <string name="parking_filter_lez_free">Outside LEZ</string>
+
+    <string name="charger_filter_free">Free</string>
+    <string name="charger_filter_fast_charge">Fast charge</string>
+    <string name="charger_filter_kw_22">22kW+</string>
+    <string name="charger_filter_kw_50">50kW+</string>
+    <string name="charger_filter_kw_150">150kW+</string>
 </resources>

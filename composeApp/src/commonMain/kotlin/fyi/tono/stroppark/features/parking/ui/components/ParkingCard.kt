@@ -3,7 +3,6 @@ package fyi.tono.stroppark.features.parking.ui.components
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,22 +13,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.EnergySavingsLeaf
 import androidx.compose.material.icons.rounded.LocalOffer
-import androidx.compose.material.icons.rounded.Navigation
-import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,19 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import fyi.tono.stroppark.core.location.getGeoUri
 import fyi.tono.stroppark.core.ui.components.molecules.InfoChip
 import fyi.tono.stroppark.core.ui.components.molecules.StatusChip
 import fyi.tono.stroppark.core.ui.theme.GhentYellow
-import fyi.tono.stroppark.core.utils.Platform
-import fyi.tono.stroppark.core.utils.getPlatform
+import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
-import kotlin.math.roundToInt
 
 @Composable
 fun ParkingCard(
@@ -150,6 +139,7 @@ fun ParkingCard(
         // Free parking chip
         if (parking.free) {
           InfoChip(
+            modifier = Modifier.testTag("${parking.id}.${ParkingFilter.FREE.name}"),
             label = "Free",
             icon = Icons.Rounded.LocalOffer,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -160,6 +150,7 @@ fun ParkingCard(
         // Low-emission zone chip
         if (parking.lez) {
           InfoChip(
+            modifier = Modifier.testTag("${parking.id}.${ParkingFilter.LEZ.name}"),
             label = "LEZ",
             icon = Icons.Rounded.EnergySavingsLeaf,
             containerColor = MaterialTheme.colorScheme.secondaryContainer,

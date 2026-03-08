@@ -10,6 +10,6 @@ fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<StropParkDatabase
   val dbFile = appContext.getDatabasePath("stropPark.db")
   return Room.databaseBuilder<StropParkDatabase>(
     context = appContext,
-    name = dbFile.absolutePath
-  )
+    name = dbFile.absolutePath,
+  ).fallbackToDestructiveMigration(true)
 }

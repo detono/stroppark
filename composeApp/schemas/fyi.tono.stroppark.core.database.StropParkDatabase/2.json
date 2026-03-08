@@ -1,0 +1,261 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "7408e513a5e937bc57bb3e790ac2c52b",
+    "entities": [
+      {
+        "tableName": "parking_locations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `openingDescription` TEXT NOT NULL, `operator` TEXT NOT NULL, `availableCapacity` INTEGER NOT NULL, `totalCapacity` INTEGER NOT NULL, `lat` REAL, `lon` REAL, `type` TEXT, `open` INTEGER, `free` INTEGER, `lez` INTEGER, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openingDescription",
+            "columnName": "openingDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operator",
+            "columnName": "operator",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "availableCapacity",
+            "columnName": "availableCapacity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalCapacity",
+            "columnName": "totalCapacity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lat",
+            "columnName": "lat",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "lon",
+            "columnName": "lon",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "open",
+            "columnName": "open",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "free",
+            "columnName": "free",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lez",
+            "columnName": "lez",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "stations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT, `address` TEXT, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `operator` TEXT, `usageCost` TEXT, `isOperational` INTEGER, `numberOfPoints` INTEGER, `distanceKm` REAL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operator",
+            "columnName": "operator",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "usageCost",
+            "columnName": "usageCost",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isOperational",
+            "columnName": "isOperational",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "numberOfPoints",
+            "columnName": "numberOfPoints",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "distanceKm",
+            "columnName": "distanceKm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cachedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "connectors",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `stationId` INTEGER NOT NULL, `typeName` TEXT, `formalName` TEXT, `powerKw` REAL, `amps` REAL, `voltage` REAL, `currentType` TEXT, `isFastCharge` INTEGER, `isOperational` INTEGER, `quantity` INTEGER, FOREIGN KEY(`stationId`) REFERENCES `stations`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stationId",
+            "columnName": "stationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "typeName",
+            "columnName": "typeName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "formalName",
+            "columnName": "formalName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "powerKw",
+            "columnName": "powerKw",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "amps",
+            "columnName": "amps",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "voltage",
+            "columnName": "voltage",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "currentType",
+            "columnName": "currentType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isFastCharge",
+            "columnName": "isFastCharge",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isOperational",
+            "columnName": "isOperational",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_connectors_stationId",
+            "unique": false,
+            "columnNames": [
+              "stationId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_connectors_stationId` ON `${TABLE_NAME}` (`stationId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "stations",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "stationId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7408e513a5e937bc57bb3e790ac2c52b')"
+    ]
+  }
+}

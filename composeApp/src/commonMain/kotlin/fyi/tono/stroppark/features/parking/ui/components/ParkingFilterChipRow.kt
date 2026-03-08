@@ -10,20 +10,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun FilterChipRow(
+internal fun ParkingFilterChipRow(
+  modifier: Modifier = Modifier,
   availableFilters: Set<ParkingFilter>,
   activeFilters: Set<ParkingFilter>,
   onFilterToggle: (ParkingFilter) -> Unit,
 ) {
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+  Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
     availableFilters.forEach { filter ->
       val selected = filter in activeFilters
       FilterChip(
+        modifier = Modifier.testTag(filter.name),
         selected = selected,
         onClick = { onFilterToggle(filter) },
         label = {

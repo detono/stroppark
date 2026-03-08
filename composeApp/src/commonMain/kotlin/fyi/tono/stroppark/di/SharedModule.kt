@@ -1,6 +1,5 @@
 package fyi.tono.stroppark.di
 
-import androidx.lifecycle.viewmodel.compose.viewModel
 import co.touchlab.kermit.Logger
 import fyi.tono.stroppark.core.database.StropParkDatabase
 import fyi.tono.stroppark.core.database.getRoomDatabase
@@ -16,9 +15,7 @@ import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.singleOf
 import org.koin.core.parameter.parametersOf
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val networkModule = module {
@@ -52,6 +49,7 @@ val dataModule = module {
     ChargerRepositoryImpl(
       logger = get { parametersOf("ChargerRepositoryImpl") },
       httpClient = get(),
+      dao = get()
     )
   }
 }
@@ -74,6 +72,7 @@ val dbModule = module {
     getRoomDatabase(get())
   }
   single { get<StropParkDatabase>().parkingDao }
+  single { get<StropParkDatabase>().chargerDao }
 }
 
 val sharedModules = listOf(

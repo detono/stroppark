@@ -2,10 +2,10 @@ package fyi.tono.stroppark.features.parking.data
 
 import co.touchlab.kermit.Logger
 import fyi.tono.stroppark.core.network.dto.GhentResponse
-import fyi.tono.stroppark.features.database.ParkingDao
-import fyi.tono.stroppark.features.database.ParkingEntity
-import fyi.tono.stroppark.features.database.toDomain
-import fyi.tono.stroppark.features.database.toEntity
+import fyi.tono.stroppark.features.parking.database.ParkingDao
+import fyi.tono.stroppark.features.parking.database.ParkingEntity
+import fyi.tono.stroppark.features.parking.database.toDomain
+import fyi.tono.stroppark.features.parking.database.toEntity
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import fyi.tono.stroppark.features.parking.domain.ParkingType
@@ -24,6 +24,7 @@ class ParkingRepositoryImpl(
 ) : ParkingRepository {
   override fun getParkingFlow(): Flow<List<ParkingLocation>> {
     return dao.getParkingLocations().map {
+      logger.d("Emitting ${it.size} parking locations")
       it.map { it.toDomain() }
     }
   }

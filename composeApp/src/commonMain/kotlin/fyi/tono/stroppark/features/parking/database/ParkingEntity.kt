@@ -1,4 +1,4 @@
-package fyi.tono.stroppark.features.database
+package fyi.tono.stroppark.features.parking.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

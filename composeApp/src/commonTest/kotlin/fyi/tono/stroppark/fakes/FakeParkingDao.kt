@@ -1,7 +1,7 @@
 package fyi.tono.stroppark.fakes
 
-import fyi.tono.stroppark.features.database.ParkingDao
-import fyi.tono.stroppark.features.database.ParkingEntity
+import fyi.tono.stroppark.features.parking.database.ParkingDao
+import fyi.tono.stroppark.features.parking.database.ParkingEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 

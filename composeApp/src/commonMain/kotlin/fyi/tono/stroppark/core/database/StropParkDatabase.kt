@@ -4,13 +4,24 @@ import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
-import fyi.tono.stroppark.features.database.ParkingDao
-import fyi.tono.stroppark.features.database.ParkingEntity
+import fyi.tono.stroppark.features.chargers.database.ChargerDao
+import fyi.tono.stroppark.features.chargers.database.ConnectorEntity
+import fyi.tono.stroppark.features.chargers.database.StationEntity
+import fyi.tono.stroppark.features.parking.database.ParkingDao
+import fyi.tono.stroppark.features.parking.database.ParkingEntity
 
-@Database(entities = [ParkingEntity::class], version = 1)
+@Database(
+  entities = [
+    ParkingEntity::class,
+    StationEntity::class,
+    ConnectorEntity::class
+  ],
+  version = 2
+)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class StropParkDatabase: RoomDatabase() {
   abstract val parkingDao: ParkingDao
+  abstract val chargerDao: ChargerDao
 }
 
 // The Room compiler generates the `actual` implementations.

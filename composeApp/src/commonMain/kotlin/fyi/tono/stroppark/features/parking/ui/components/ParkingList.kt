@@ -5,22 +5,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fyi.tono.stroppark.core.location.getGeoUri
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
-import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 import fyi.tono.stroppark.features.parking.ui.ParkingAction
+import fyi.tono.stroppark.features.parking.ui.ParkingTestTags
 import fyi.tono.stroppark.features.parking.ui.ParkingUiState
 
 
 @Composable
 fun ParkingList(
+  modifier: Modifier = Modifier,
   uiState: ParkingUiState,
   onAction: (ParkingAction) -> Unit,
 ) {
@@ -47,11 +46,13 @@ fun ParkingList(
   }
 
   LazyColumn(
+    modifier = modifier.testTag(ParkingTestTags.PARKING_LIST),
     contentPadding = PaddingValues(16.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
     content = {
       item {
-        FilterChipRow(
+        ParkingFilterChipRow(
+          modifier = Modifier.testTag(ParkingTestTags.CHIP_ROW),
           availableFilters = uiState.availableFilters,
           activeFilters = activeFilters,
           onFilterToggle = {

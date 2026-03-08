@@ -38,22 +38,42 @@ class ParkingViewModel(
 
   init {
     repository.getParkingFlow().onEach { spots ->
+      println("Received ${spots.size} spots")
       _uiState.update { currentState ->
-        val mappedSpots = spots.map { spot ->
-          val userLoc = locationService.getCurrentLocation()
-          val distance = if (userLoc != null && spot.latitude != null && spot.longitude != null) {
-            LocationUtils.calculateDistance(
-              userLoc.lat, userLoc.lon,
-              spot.latitude, spot.longitude
-            )
-          } else null
-          spot.copy(distanceKm = distance)
-        }.sortedBy { it.distanceKm ?: Double.MAX_VALUE } // The "Closest First" logic!
-
         currentState.copy(
-          parkingSpots = mappedSpots,
+          parkingSpots = spots, // Unsorted, no distances yet
           isLoading = false
         )
+      }
+
+      viewModelScope.launch {
+        val userLoc = try {
+          locationService.getCurrentLocation()
+        } catch (e: Exception) {
+          println("Failed to get location: ${e.message}")
+          null
+        }
+
+        _uiState.update { currentState ->
+          println("Trying to update ${spots.size} spots")
+          println("Got current location ${userLoc?.lon}")
+
+          val mappedSpots = spots.map { spot ->
+            val distance = if (userLoc != null && spot.latitude != null && spot.longitude != null) {
+              println("Calculating distance")
+              LocationUtils.calculateDistance(
+                userLoc.lat, userLoc.lon,
+                spot.latitude, spot.longitude
+              )
+            } else null
+            spot.copy(distanceKm = distance)
+          }.sortedBy { it.distanceKm ?: Double.MAX_VALUE }
+          println("Trying to update ${spots.size} spots after it was sorted")
+          currentState.copy(
+            parkingSpots = mappedSpots,
+            isLoading = false
+          )
+        }
       }
     }
     .launchIn(viewModelScope)
@@ -94,7 +114,7 @@ class ParkingViewModel(
     pollingJob = viewModelScope.launch {
       while (isActive) {
         fetchData(isSilent = _uiState.value.parkingSpots.isNotEmpty())
-        delay(5 * 60 * 1000) // 5 Minutes
+        delay(15 * 60 * 1_000) // 15 Minutes
       }
     }
   }

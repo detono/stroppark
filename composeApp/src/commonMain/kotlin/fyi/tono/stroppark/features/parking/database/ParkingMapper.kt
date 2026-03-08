@@ -1,6 +1,5 @@
-package fyi.tono.stroppark.features.database
+package fyi.tono.stroppark.features.parking.database
 
-import fyi.tono.stroppark.features.parking.data.ParkingDto
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 import fyi.tono.stroppark.features.parking.domain.ParkingType
 import kotlin.time.Instant

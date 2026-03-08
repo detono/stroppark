@@ -1,18 +1,14 @@
 package fyi.tono.stroppark.features.chargers.data
 
+import fyi.tono.stroppark.fakes.FakeChargerDao
 import fyi.tono.stroppark.features.core.data.BaseRepositoryImplTests
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
@@ -55,6 +51,78 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
         }
     """.trimIndent()
 
+  private val OCM_JSON = """
+    [
+      {
+        "id": 9082,
+        "name": "CIAC Sint Amandsberg",
+        "address": "Antwerpsesteenweg 683 , Sint Amandsberg, 9040 ",
+        "latitude": 51.0708977695468,
+        "longitude": 3.77075008890279,
+        "operator": "Blue Corner (Belgium)",
+        "usage_cost": null,
+        "is_operational": true,
+        "number_of_points": 1,
+        "connectors": [
+          {
+            "type_name": "CEE 7/4 - Schuko - Type F",
+            "formal_name": "CEE 7/4",
+            "power_kw": 3.75,
+            "amps": 16,
+            "voltage": 230,
+            "current_type": "AC (Single-Phase)",
+            "is_fast_charge": false,
+            "is_operational": true,
+            "quantity": 1
+          },
+          {
+            "type_name": "Type 2 (Socket Only)",
+            "formal_name": "IEC 62196-2 Type 2",
+            "power_kw": 22,
+            "amps": 32,
+            "voltage": 400,
+            "current_type": "AC (Three-Phase)",
+            "is_fast_charge": false,
+            "is_operational": true,
+            "quantity": 1
+          }
+        ],
+        "distance_km": null
+      },
+      {
+        "id": 9128,
+        "name": "Restaurant Patyntje",
+        "address": "Gordunakaai 91, Gent, 9000",
+        "latitude": 51.0415487,
+        "longitude": 3.6945205,
+        "operator": null,
+        "usage_cost": "Free",
+        "is_operational": true,
+        "number_of_points": 1,
+        "connectors": [
+          {
+            "type_name": "Type 2 (Tethered Connector) ",
+            "formal_name": "IEC 62196-2",
+            "power_kw": 11,
+            "amps": 16,
+            "voltage": 380,
+            "current_type": "AC (Three-Phase)",
+            "is_fast_charge": false,
+            "is_operational": true,
+            "quantity": 2
+          }
+        ],
+        "distance_km": null
+      }
+    ]
+  """.trimIndent()
+
+  private lateinit var fakeChargerDao: FakeChargerDao
+  @BeforeTest
+  fun setup() {
+    fakeChargerDao = FakeChargerDao()
+  }
+
   @Test
   fun `getChargers returns mapped domain data`() = runTest {
     val client = createClientWithResponse(
@@ -62,7 +130,7 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client)
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
     val result = repo.getChargers()
 
     assertEquals(1, result.size)
@@ -78,9 +146,157 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       HttpStatusCode.InternalServerError
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client)
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
     val result = repo.getChargers()
 
     assertTrue(result.isEmpty(), "Expected empty list on server error")
+  }
+
+  @Test
+  fun `refreshStation has inserted correct amount in db`() = runTest {
+    val client = createClientWithResponse(
+      content = OCM_JSON,
+      statusCode = HttpStatusCode.OK
+    )
+
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    repo.refreshStations()
+
+    val connectors = fakeChargerDao.getInsertedConnectors()
+    val stations = fakeChargerDao.getInsertedStations()
+
+    assertEquals(3, connectors.size)
+    assertEquals(2, stations.size)
+  }
+
+  @Test
+  fun `refreshStation has mapped correctly`() = runTest {
+    val client = createClientWithResponse(
+      content = OCM_JSON,
+      statusCode = HttpStatusCode.OK
+    )
+
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    repo.refreshStations()
+
+    val connectors = fakeChargerDao.getInsertedConnectors()
+    val stations = fakeChargerDao.getInsertedStations()
+
+    val amandsBergStation = stations.firstOrNull { it.id == 9082L }
+    val amandsBergConnectors = connectors.filter { it.stationId == 9082L }
+
+    val patyntjeStation = stations.firstOrNull { it.id == 9128L }
+    val patyntjeConnectors = connectors.filter { it.stationId == 9128L }
+
+    assertEquals(
+      "CIAC Sint Amandsberg",
+      amandsBergStation?.name,
+    )
+    assertEquals(
+      "Antwerpsesteenweg 683 , Sint Amandsberg, 9040 ",
+      amandsBergStation?.address,
+    )
+    assertEquals(
+      51.0708977695468,
+      amandsBergStation?.latitude,
+    )
+    assertEquals(
+      3.77075008890279,
+      amandsBergStation?.longitude,
+    )
+    assertEquals(
+      "Blue Corner (Belgium)",
+      amandsBergStation?.operator,
+    )
+    assertEquals(
+      null,
+      amandsBergStation?.usageCost,
+    )
+    assertEquals(
+      true,
+      amandsBergStation?.isOperational,
+      "isOperational not matching"
+    )
+    assertEquals(
+      1,
+      amandsBergStation?.numberOfPoints,
+    )
+    assertEquals(
+      2,
+      amandsBergConnectors.size,
+    )
+    assertEquals(
+      "CEE 7/4 - Schuko - Type F",
+      amandsBergConnectors.firstOrNull()?.typeName,
+    )
+    assertEquals(
+      "CEE 7/4",
+      amandsBergConnectors.firstOrNull()?.formalName,
+    )
+    assertEquals(
+      3.75,
+      amandsBergConnectors.firstOrNull()?.powerKw,
+    )
+    assertEquals(
+      true,
+      amandsBergConnectors.firstOrNull()?.isOperational,
+      "isOperation not matching in connector"
+    )
+    assertEquals(
+      16.0,
+      amandsBergConnectors.firstOrNull()?.amps,
+    )
+    assertEquals(
+      230.0,
+      amandsBergConnectors.firstOrNull()?.voltage,
+    )
+    assertEquals(
+      "AC (Single-Phase)",
+      amandsBergConnectors.firstOrNull()?.currentType,
+    )
+    assertEquals(
+      false,
+      amandsBergConnectors.firstOrNull()?.isFastCharge,
+      "isFastCharge not matching"
+    )
+    assertEquals(
+      1,
+      amandsBergConnectors.firstOrNull()?.quantity,
+    )
+
+    //Don't need to recheck all the fields because if above is OK
+    //this one will be as well (same for 2nd connector)
+    assertNotNull(patyntjeStation)
+    assertEquals(1, patyntjeConnectors.size)
+  }
+
+  @Test
+  fun `getStationsWithConnectors emits correctly`() = runTest {
+    val client = createClientWithResponse(
+      content = OCM_JSON,
+      statusCode = HttpStatusCode.OK
+    )
+
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    repo.refreshStations()
+
+    val stationsWithConnectors = fakeChargerDao.getStationsWithConnectors().first()
+
+    assertEquals(
+      2,
+      stationsWithConnectors.size
+    )
+    assertEquals(
+      "CIAC Sint Amandsberg",
+      stationsWithConnectors.firstOrNull()?.station?.name
+    )
+    assertEquals(
+      2,
+      stationsWithConnectors.firstOrNull()?.connectors?.size
+    )
+    assertEquals(
+      1,
+      stationsWithConnectors.lastOrNull()?.connectors?.size
+    )
   }
 }

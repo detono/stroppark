@@ -1,5 +1,6 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -9,6 +10,19 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.buildKonfig)
+}
+
+buildkonfig {
+    packageName = "fyi.tono.stroppark"
+
+    defaultConfigs {
+        val localProperties = Properties()
+        localProperties.load(rootProject.file("local.properties").inputStream())
+
+        buildConfigField(STRING, "API_BASE_URL", "https://ocm.tono.fyi")
+        buildConfigField(STRING, "API_KEY", localProperties["OCM_API_KEY"].toString())
+    }
 }
 
 room {
@@ -94,6 +108,14 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(ktorLibs.client.mock)
+
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.robolectric)
+            implementation(libs.junit)
         }
     }
 }
@@ -101,6 +123,12 @@ kotlin {
 android {
     namespace = "fyi.tono.stroppark"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 
     defaultConfig {
         applicationId = "fyi.tono.stroppark"
@@ -127,6 +155,8 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)

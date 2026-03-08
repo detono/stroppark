@@ -10,12 +10,14 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun InfoChip(
+  modifier: Modifier = Modifier,
   label: String,
   icon: ImageVector,
   containerColor: Color,
   contentColor: Color,
 ) {
   StropChip(
+    modifier = modifier,
     label = label,
     containerColor = containerColor,
     contentColor = contentColor,
