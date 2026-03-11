@@ -82,7 +82,7 @@ class ChargerViewModel(
             current.activeFilters - action.filter
           } else (
               current.activeFilters + action.filter
-              )
+          )
 
           current.copy(activeFilters = newFilters)
         }

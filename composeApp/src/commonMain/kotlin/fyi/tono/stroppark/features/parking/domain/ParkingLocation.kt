@@ -24,4 +24,6 @@ data class ParkingLocation(
   val occupancyProgress: Float = if (totalCapacity > 0)
     (totalCapacity - availableCapacity).toFloat() / totalCapacity
   else 0f
+
+  val hasCoordinates = latitude != null && longitude != null
 }

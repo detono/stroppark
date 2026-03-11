@@ -9,6 +9,7 @@ import fyi.tono.stroppark.core.network.createHttpClient
 import fyi.tono.stroppark.features.chargers.data.ChargerRepositoryImpl
 import fyi.tono.stroppark.features.chargers.domain.ChargerRepository
 import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
+import fyi.tono.stroppark.features.map.ui.MapViewModel
 import fyi.tono.stroppark.features.parking.data.ParkingRepositoryImpl
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
 import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
@@ -60,6 +61,7 @@ val featureModule = module {
   // ViewModels (Using factory because we want a fresh one per screen)
   factoryOf(::ParkingViewModel)
   factoryOf(::ChargerViewModel)
+  factoryOf(::MapViewModel)
 }
 
 val locationModule = module {

@@ -3,6 +3,9 @@ package fyi.tono.stroppark.core.location
 import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.CoreLocation.*
 import platform.Foundation.*
@@ -67,6 +70,28 @@ actual class LocationServiceImpl: LocationService {
       else -> {
         continuation.resume(null)
       }
+    }
+  }
+
+  @OptIn(ExperimentalForeignApi::class)
+  actual override fun getLocationUpdates(intervalMs: Long): Flow<GhentCoordinatesDto?> = callbackFlow {
+    val delegate = object : NSObject(), CLLocationManagerDelegateProtocol {
+      override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
+        val location = didUpdateLocations.lastOrNull() as? CLLocation
+        location?.let {
+          val lat = it.coordinate.useContents { latitude }
+          val lon = it.coordinate.useContents { longitude }
+          trySend(GhentCoordinatesDto(lat, lon))
+        }
+      }
+    }
+
+    locationManager.delegate = delegate
+    locationManager.startUpdatingLocation()
+
+    awaitClose {
+      locationManager.stopUpdatingLocation()
+      locationManager.delegate = null
     }
   }
 }

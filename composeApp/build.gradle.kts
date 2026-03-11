@@ -13,6 +13,8 @@ plugins {
     alias(libs.plugins.buildKonfig)
 }
 
+var mapsApiKey = ""
+
 buildkonfig {
     packageName = "fyi.tono.stroppark"
 
@@ -20,8 +22,12 @@ buildkonfig {
         val localProperties = Properties()
         localProperties.load(rootProject.file("local.properties").inputStream())
 
+        mapsApiKey = localProperties["MAP_API_KEY"].toString()
+
         buildConfigField(STRING, "API_BASE_URL", "https://ocm.tono.fyi")
         buildConfigField(STRING, "API_KEY", localProperties["OCM_API_KEY"].toString())
+        buildConfigField(STRING, "MAPS_API_KEY", mapsApiKey)
+
     }
 }
 
@@ -59,10 +65,6 @@ kotlin {
 
             implementation(libs.play.services.location)
             implementation(libs.play.services.coroutines)
-
-            implementation(libs.maps.compose)
-            implementation(libs.maps.compose.utils)
-            implementation(libs.maps.compose.widgets)
         }
         iosMain.dependencies {
             implementation(ktorLibs.client.darwin)
@@ -107,6 +109,10 @@ kotlin {
             //Room
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+
+            //GMaps
+            implementation(libs.kmp.maps.compose)
+            implementation(libs.kmp.maps.compose.utils)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -140,6 +146,8 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
     packaging {
         resources {

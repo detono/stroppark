@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import fyi.tono.stroppark.features.chargers.ui.screens.ChargerListScreen
+import fyi.tono.stroppark.features.map.ui.screens.MapScreen
 import fyi.tono.stroppark.features.parking.ui.screens.ParkingListScreen
 
 
@@ -42,6 +43,9 @@ fun AppNavigation(
           }
           composable(NavItem.Chargers.route) {
             ChargerListScreen()
+          }
+          composable(NavItem.Map.route) {
+            MapScreen()
           }
         }
       )
