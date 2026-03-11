@@ -8,21 +8,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
-  primary = GhentPurple,
-  onPrimary = Color.White,
-  primaryContainer = Color(0xFFE1E0FF),
-  secondary = GhentCyan,
+  primary = md_theme_light_primary,
+  onPrimary = md_theme_light_onPrimary,
+  primaryContainer = md_theme_light_primary_container,
+  secondary = md_theme_light_secondary,
   onSecondary = Color.White,
-  surface = Color(0xFFF8F9FA), // Very light grey for a clean look
+  secondaryContainer = md_theme_light_secondary_container,
+  onSecondaryContainer = md_theme_light_onSecondary_container,
+  surface = md_theme_light_surface,
   onSurface = GhentBlack,
-  error = Color(0xFFBA1A1A),
-  errorContainer = Color(0xFFFFDAD6)
+  error = md_theme_light_error,
+  errorContainer = md_theme_light_error_container
 )
 
 private val DarkColorScheme = darkColorScheme(
   primary = md_theme_dark_primary,
   onPrimary = md_theme_dark_onPrimary,
+  primaryContainer = md_theme_dark_primary_container,
+  onPrimaryContainer = md_theme_dark_onPrimary_container,
   secondary = md_theme_dark_secondary,
+  onSecondary = md_theme_dark_onSecondary,
+  secondaryContainer = md_theme_dark_secondary_container,
+  onSecondaryContainer = md_theme_dark_onSecondary_container,
   surface = GhentBlack,
   onSurface = Color.White
 )
