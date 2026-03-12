@@ -18,10 +18,21 @@ buildkonfig {
 
     defaultConfigs {
         val localProperties = Properties()
-        localProperties.load(rootProject.file("local.properties").inputStream())
+        val localPropertiesFile = rootProject.file("local.properties")
+
+        // Only try to load if the file actually exists
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
 
         buildConfigField(STRING, "API_BASE_URL", "https://ocm.tono.fyi")
-        buildConfigField(STRING, "API_KEY", localProperties["OCM_API_KEY"].toString())
+
+        // Priority: 1. Environment Variable (CI) 2. local.properties (Local) 3. Empty fallback
+        val apiKey = System.getenv("OCM_API_KEY")
+            ?: localProperties["OCM_API_KEY"]?.toString()
+            ?: ""
+
+        buildConfigField(STRING, "API_KEY", apiKey)
     }
 }
 
