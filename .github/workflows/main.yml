@@ -20,7 +20,7 @@ jobs:
 
       # Run tests for the composeApp module
       - name: Run Unit Tests
-        run: ./gradlew :composeApp:testReleaseUnitTest
+        run: ./gradlew :composeApp:testDebugUnitTest
 
       - name: Decode Keystore
         # We put the key inside composeApp since that's where the Android build happens
