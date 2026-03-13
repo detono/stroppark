@@ -1,3 +1,6 @@
+![Version](https://img.shields.io/google-play/v/fyi.tono.stroppark?style=flat-square)
+![Installs](https://img.shields.io/google-play/installs/fyi.tono.stroppark?style=flat-square)
+![Rating](https://img.shields.io/google-play/rating/fyi.tono.stroppark?style=flat-square)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/detono/stroppark/main.yml?branch=main&label=Android%20CI&style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-passed-brightgreen?style=flat-square)
 
