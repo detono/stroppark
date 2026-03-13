@@ -3,6 +3,10 @@
 ![Rating](https://img.shields.io/google-play/rating/fyi.tono.stroppark?style=flat-square)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/detono/stroppark/main.yml?branch=main&label=Android%20CI&style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-passed-brightgreen?style=flat-square)
+![Kotlin](https://img.shields.io/badge/kotlin-1.9.20-blue.svg?logo=kotlin&style=flat-square)
+![Compose](https://img.shields.io/badge/UI-Compose%20Multiplatform-orange?logo=jetpackcompose&style=flat-square)
+![Android](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&style=flat-square)
+![License](https://img.shields.io/github/license/detono/stroppark?style=flat-square)
 
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
