@@ -1,4 +1,4 @@
-![Build Status](https://img.shields.io/github/actions/workflow/status/USER_NAME/REPO_NAME/main.yml?branch=main&label=Android%20CI&style=flat-square)
+![Build Status](https://img.shields.io/github/actions/workflow/status/detono/stroppark/main.yml?branch=main&label=Android%20CI&style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-passed-brightgreen?style=flat-square)
 
 This is a Kotlin Multiplatform project targeting Android, iOS.
