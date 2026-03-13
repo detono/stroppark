@@ -1,3 +1,6 @@
+![Build Status](https://img.shields.io/github/actions/workflow/status/USER_NAME/REPO_NAME/main.yml?branch=main&label=Android%20CI&style=flat-square)
+![Tests](https://img.shields.io/badge/tests-passed-brightgreen?style=flat-square)
+
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
 * [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
