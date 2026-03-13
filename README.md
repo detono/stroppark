@@ -8,7 +8,7 @@
 ![Compose](https://img.shields.io/badge/UI-Compose%20Multiplatform-orange?logo=jetpackcompose&style=flat-square)
 ![Android](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&style=flat-square)
 ![License](https://img.shields.io/github/license/detono/stroppark?style=flat-square)
-[![Support Tosty on Ko-fi](https://img.shields.io/badge/Support_Tosty-Tea-BD8C5E?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/detono)
+[![Support Tono on Ko-fi](https://img.shields.io/badge/Support_Tosty-Tea-BD8C5E?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/detono)
 
 # StropPark
 
