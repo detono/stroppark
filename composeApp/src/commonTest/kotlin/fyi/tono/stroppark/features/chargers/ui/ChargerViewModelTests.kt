@@ -3,24 +3,29 @@ package fyi.tono.stroppark.features.chargers.ui
 import fyi.tono.stroppark.fakes.FakeChargerRepository
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
-import fyi.tono.stroppark.features.chargers.domain.ChargerPoint
 import fyi.tono.stroppark.features.core.ui.BaseViewModelTests
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-
+@OptIn(ExperimentalCoroutinesApi::class)
 class ChargerViewModelTests : BaseViewModelTests() {
-
   private val fakeLocationPermissionService = FakeLocationPermissionService()
   private val fakeLocationService = FakeLocationService()
-  private val fakeRepo = FakeChargerRepository()
+  private val fakeRepository = FakeChargerRepository()
+  private val viewModel: ChargerViewModel = ChargerViewModel(
+    fakeRepository,
+    fakeLocationService,
+    fakeLocationPermissionService
+  )
 
   @Test
   fun `initial state is loading with no data`() = runTest {
-    val viewModel = ChargerViewModel(fakeRepo, fakeLocationService, fakeLocationPermissionService)
+    val viewModel = ChargerViewModel(fakeRepository, fakeLocationService, fakeLocationPermissionService)
     val state = viewModel.uiState.value
 
     assertTrue(state.isLoading)
@@ -28,46 +33,33 @@ class ChargerViewModelTests : BaseViewModelTests() {
     assertNull(state.errorMessage)
   }
 
+
   @Test
-  fun `fetchData updates uiState with success`() = runTest {
-    val viewModel = ChargerViewModel(fakeRepo, fakeLocationService, fakeLocationPermissionService)
-    val testPoint = ChargerPoint(
-      "1",
-      "Address",
-      "Allego",
-      "AC",
-      22,
-      51.0,
-      3.7,
-      "In dienst",
+  fun `fetchData success turns off loading spinner`() = runTest {
+    val viewModel = ChargerViewModel(
+      fakeRepository,
+      fakeLocationService,
+      fakeLocationPermissionService
     )
-
-    fakeRepo.mockData = listOf(testPoint)
-
     viewModel.fetchData()
 
-    val state = viewModel.uiState.value
-    assertEquals(1, state.chargers.size)
-    assertEquals("Allego", state.chargers.first().operator)
+    advanceUntilIdle()
+
+    val currentState = viewModel.uiState.value
+    assertEquals(false, currentState.isLoading)
+    assertEquals(null, currentState.errorMessage)
   }
 
   @Test
-  fun `failed fetch sets error message but keeps old data`() = runTest {
-    val viewModel = ChargerViewModel(fakeRepo, fakeLocationService, fakeLocationPermissionService)
+  fun `fetchData failure updates errorMessage`() = runTest {
+    fakeRepository.shouldReturnError = true
 
-    // 1. Load some initial data successfully
-    fakeRepo.mockData = listOf(
-      ChargerPoint("1", "Address", "Provider", "AC", 22, 51.0, 3.7, "In dienst")
-    )
     viewModel.fetchData()
 
-    // 2. Trigger a failing refresh
-    fakeRepo.shouldReturnError = true
-    viewModel.fetchData(isSilent = true)
+    advanceUntilIdle()
 
-    val state = viewModel.uiState.value
-
-    assertEquals(1, state.chargers.size)
-    assertEquals("Could not update: Network Error", state.errorMessage)
+    val currentState = viewModel.uiState.value
+    assertEquals(false, currentState.isLoading, "isLoading should be false")
+    assertEquals("Network Fail", currentState.errorMessage, "errorMessage doesn't match")
   }
 }

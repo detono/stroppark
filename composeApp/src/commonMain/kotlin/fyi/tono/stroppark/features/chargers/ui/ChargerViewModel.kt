@@ -70,8 +70,7 @@ class ChargerViewModel(
           )
         }
       }
-    }
-      .launchIn(viewModelScope)
+    }.launchIn(viewModelScope)
   }
 
   fun onAction(action: ChargerAction) {
