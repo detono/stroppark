@@ -34,7 +34,7 @@ We may update our Privacy Policy from time to time. We will notify you of any ch
 
 ## 7. Contact Us
 If you have any questions about this Privacy Policy, please contact us at:
-(team.tosty@proton.be)[team.tosty@proton.be]
+[team.tosty@proton.me](mailto:team.tosty@proton.me)
 
 ## 8. Data Sources and Disclaimer
 
