@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/detono/stroppark/compare/v1.0.0...v1.1.0) (2026-03-20)
+
+
+### Features
+
+* test force push to internal ([98705ea](https://github.com/detono/stroppark/commit/98705eae18f6ff3a4bf77e86bbecb7326950792a))
+* testing on push & push to play store ([ce404b5](https://github.com/detono/stroppark/commit/ce404b5b98875d96786956465de17c642dc7dfb6))
+
 ## 1.0.0 (2026-03-20)
 
 
