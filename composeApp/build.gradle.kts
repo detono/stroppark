@@ -131,6 +131,13 @@ kotlin {
     }
 }
 
+// Grab the run number, defaulting to 1 for local builds
+val runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "1"
+
+// Use the tag from release-please if available, otherwise fallback to 1.0.X
+val ciVersionName = System.getenv("VERSION_NAME") ?: "1.0.$runNumber"
+val ciVersionCode = runNumber.toIntOrNull() ?: 1
+
 android {
     namespace = "fyi.tono.stroppark"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -146,8 +153,8 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
 
-        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toInt() ?: 1
-        versionName = "1.0.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"
+        versionCode = ciVersionCode
+        versionName = ciVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
