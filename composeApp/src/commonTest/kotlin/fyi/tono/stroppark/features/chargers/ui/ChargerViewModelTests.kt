@@ -60,6 +60,6 @@ class ChargerViewModelTests : BaseViewModelTests() {
 
     val currentState = viewModel.uiState.value
     assertEquals(false, currentState.isLoading, "isLoading should be false")
-    assertEquals("Network Fail", currentState.errorMessage, "errorMessage doesn't match")
+    assertEquals("An unexpected error occurred", currentState.errorMessage, "errorMessage doesn't match")
   }
 }

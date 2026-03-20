@@ -52,69 +52,74 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
     """.trimIndent()
 
   private val OCM_JSON = """
-    [
-      {
-        "id": 9082,
-        "name": "CIAC Sint Amandsberg",
-        "address": "Antwerpsesteenweg 683 , Sint Amandsberg, 9040 ",
-        "latitude": 51.0708977695468,
-        "longitude": 3.77075008890279,
-        "operator": "Blue Corner (Belgium)",
-        "usage_cost": null,
-        "is_operational": true,
-        "number_of_points": 1,
-        "connectors": [
-          {
-            "type_name": "CEE 7/4 - Schuko - Type F",
-            "formal_name": "CEE 7/4",
-            "power_kw": 3.75,
-            "amps": 16,
-            "voltage": 230,
-            "current_type": "AC (Single-Phase)",
-            "is_fast_charge": false,
-            "is_operational": true,
-            "quantity": 1
-          },
-          {
-            "type_name": "Type 2 (Socket Only)",
-            "formal_name": "IEC 62196-2 Type 2",
-            "power_kw": 22,
-            "amps": 32,
-            "voltage": 400,
-            "current_type": "AC (Three-Phase)",
-            "is_fast_charge": false,
-            "is_operational": true,
-            "quantity": 1
-          }
-        ],
-        "distance_km": null
-      },
-      {
-        "id": 9128,
-        "name": "Restaurant Patyntje",
-        "address": "Gordunakaai 91, Gent, 9000",
-        "latitude": 51.0415487,
-        "longitude": 3.6945205,
-        "operator": null,
-        "usage_cost": "Free",
-        "is_operational": true,
-        "number_of_points": 1,
-        "connectors": [
-          {
-            "type_name": "Type 2 (Tethered Connector) ",
-            "formal_name": "IEC 62196-2",
-            "power_kw": 11,
-            "amps": 16,
-            "voltage": 380,
-            "current_type": "AC (Three-Phase)",
-            "is_fast_charge": false,
-            "is_operational": true,
-            "quantity": 2
-          }
-        ],
-        "distance_km": null
-      }
-    ]
+    {
+      "total": 2,
+      "limit": 200,
+      "offset": 0,
+      "data": [
+        {
+          "id": 9082,
+          "name": "CIAC Sint Amandsberg",
+          "address": "Antwerpsesteenweg 683 , Sint Amandsberg, 9040 ",
+          "latitude": 51.0708977695468,
+          "longitude": 3.77075008890279,
+          "operator": "Blue Corner (Belgium)",
+          "usage_cost": null,
+          "is_operational": true,
+          "number_of_points": 1,
+          "connectors": [
+            {
+              "type_name": "CEE 7/4 - Schuko - Type F",
+              "formal_name": "CEE 7/4",
+              "power_kw": 3.75,
+              "amps": 16,
+              "voltage": 230,
+              "current_type": "AC (Single-Phase)",
+              "is_fast_charge": false,
+              "is_operational": true,
+              "quantity": 1
+            },
+            {
+              "type_name": "Type 2 (Socket Only)",
+              "formal_name": "IEC 62196-2 Type 2",
+              "power_kw": 22,
+              "amps": 32,
+              "voltage": 400,
+              "current_type": "AC (Three-Phase)",
+              "is_fast_charge": false,
+              "is_operational": true,
+              "quantity": 1
+            }
+          ],
+          "distance_km": null
+        },
+        {
+          "id": 9128,
+          "name": "Restaurant Patyntje",
+          "address": "Gordunakaai 91, Gent, 9000",
+          "latitude": 51.0415487,
+          "longitude": 3.6945205,
+          "operator": null,
+          "usage_cost": "Free",
+          "is_operational": true,
+          "number_of_points": 1,
+          "connectors": [
+            {
+              "type_name": "Type 2 (Tethered Connector) ",
+              "formal_name": "IEC 62196-2",
+              "power_kw": 11,
+              "amps": 16,
+              "voltage": 380,
+              "current_type": "AC (Three-Phase)",
+              "is_fast_charge": false,
+              "is_operational": true,
+              "quantity": 2
+            }
+          ],
+          "distance_km": null
+        }
+      ]
+    }
   """.trimIndent()
 
   private lateinit var fakeChargerDao: FakeChargerDao
@@ -167,6 +172,38 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
 
     assertEquals(3, connectors.size)
     assertEquals(2, stations.size)
+  }
+
+  @Test
+  fun `refreshStations sets lastSyncedAt after successful fetch`() = runTest {
+    val client = createClientWithResponse(
+      content = OCM_JSON,
+      statusCode = HttpStatusCode.OK
+    )
+
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    repo.refreshStations()
+
+    assertNotNull(fakeChargerDao.getLastSyncedAt())
+  }
+
+  @Test
+  fun `refreshStations upserts on subsequent calls`() = runTest {
+    val client = createClientWithResponse(
+      content = OCM_JSON,
+      statusCode = HttpStatusCode.OK
+    )
+
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+
+    // first call — full fetch, clears and inserts
+    repo.refreshStations()
+    assertEquals(2, fakeChargerDao.getInsertedStations().size)
+    assertNotNull(fakeChargerDao.getLastSyncedAt())
+
+    // second call — delta fetch, should still have same data
+    repo.refreshStations()
+    assertEquals(2, fakeChargerDao.getInsertedStations().size)
   }
 
   @Test
@@ -284,7 +321,8 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
 
     assertEquals(
       2,
-      stationsWithConnectors.size
+      stationsWithConnectors.size,
+      "expected 2 stations with connectors"
     )
     assertEquals(
       "CIAC Sint Amandsberg",
@@ -292,11 +330,13 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
     )
     assertEquals(
       2,
-      stationsWithConnectors.firstOrNull()?.connectors?.size
+      stationsWithConnectors.firstOrNull()?.connectors?.size,
+      "expected 2 connectors"
     )
     assertEquals(
       1,
-      stationsWithConnectors.lastOrNull()?.connectors?.size
+      stationsWithConnectors.lastOrNull()?.connectors?.size,
+      "expected 1 connector"
     )
   }
 }
