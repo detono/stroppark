@@ -2,6 +2,7 @@ package fyi.tono.stroppark.features.chargers.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import fyi.tono.stroppark.core.location.LocationPermissionService
 import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.core.location.LocationService
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 class ChargerViewModel(
   private val repository: ChargerRepository,
   private val locationService: LocationService,
-  private val locationPermission: LocationPermissionService
+  private val locationPermission: LocationPermissionService,
+  private val logger: Logger = Logger.withTag("ChargerViewModel")
 ): ViewModel() {
   private val _uiState = MutableStateFlow(ChargerUiState(isLoading = true))
   val uiState = _uiState.asStateFlow()
@@ -39,6 +41,9 @@ class ChargerViewModel(
   init {
     repository.getStationFlow().onEach { stationsAndConnectors ->
       val chargers = stationsAndConnectors.map { it.toUiModel() }
+
+      logger.i("Received ${chargers.size} chargers")
+
       _uiState.update { currentState ->
         currentState.copy(
           chargers = chargers,
@@ -128,9 +133,11 @@ class ChargerViewModel(
             }
           },
           onFailure = { throwable ->
+            throwable.message?.let { logger.e(it) }
+
             _uiState.update { it.copy(
               isLoading = false,
-              errorMessage = throwable.message ?: "An unexpected error occurred"
+              errorMessage = "An unexpected error occurred"
             )}
           }
         )
