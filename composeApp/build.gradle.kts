@@ -148,6 +148,7 @@ android {
         }
     }
 
+
     defaultConfig {
         applicationId = "fyi.tono.stroppark"
         minSdk = libs.versions.android.minSdk.get().toInt()
