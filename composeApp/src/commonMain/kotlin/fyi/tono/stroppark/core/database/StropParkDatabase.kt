@@ -7,6 +7,7 @@ import androidx.room.RoomDatabaseConstructor
 import fyi.tono.stroppark.features.chargers.database.ChargerDao
 import fyi.tono.stroppark.features.chargers.database.ConnectorEntity
 import fyi.tono.stroppark.features.chargers.database.StationEntity
+import fyi.tono.stroppark.features.chargers.database.SyncMetadataEntity
 import fyi.tono.stroppark.features.parking.database.ParkingDao
 import fyi.tono.stroppark.features.parking.database.ParkingEntity
 
@@ -14,9 +15,10 @@ import fyi.tono.stroppark.features.parking.database.ParkingEntity
   entities = [
     ParkingEntity::class,
     StationEntity::class,
-    ConnectorEntity::class
+    ConnectorEntity::class,
+    SyncMetadataEntity::class
   ],
-  version = 2
+  version = 3
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class StropParkDatabase: RoomDatabase() {

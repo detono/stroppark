@@ -31,6 +31,11 @@ interface ChargerDao {
   suspend fun clearAndInsert(stations: List<StationEntity>, connectors: List<ConnectorEntity>) {
     clearConnectors()
     clearStations()
+    insert(stations, connectors)
+  }
+
+  @Transaction
+  suspend fun insert(stations: List<StationEntity>, connectors: List<ConnectorEntity>) {
     insertStations(stations)
     insertConnectors(connectors)
   }
@@ -38,4 +43,10 @@ interface ChargerDao {
   @Transaction
   @Query("SELECT * FROM stations")
   fun getStationsWithConnectors(): Flow<List<StationWithConnectors>>
+
+  @Query("SELECT value FROM sync_metadata WHERE meta_key = 'last_synced_at'")
+  suspend fun getLastSyncedAt(): String?
+
+  @Query("INSERT OR REPLACE INTO sync_metadata (meta_key, value) VALUES ('last_synced_at', :value)")
+  suspend fun setLastSyncedAt(value: String)
 }
