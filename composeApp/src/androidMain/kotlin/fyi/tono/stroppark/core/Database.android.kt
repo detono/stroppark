@@ -11,5 +11,5 @@ fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<StropParkDatabase
   return Room.databaseBuilder<StropParkDatabase>(
     context = appContext,
     name = dbFile.absolutePath,
-  ).fallbackToDestructiveMigration(true)
+  )//.fallbackToDestructiveMigration(true)
 }

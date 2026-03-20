@@ -7,6 +7,7 @@ import fyi.tono.stroppark.features.chargers.database.StationWithConnectors
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlin.time.Instant
 
 class FakeChargerDao: ChargerDao {
   private var storedConnectors: List<ConnectorEntity> = emptyList()
@@ -15,14 +16,37 @@ class FakeChargerDao: ChargerDao {
   private val flowConnectors = MutableStateFlow<List<ConnectorEntity>>(emptyList())
   private val flowStations = MutableStateFlow<List<StationEntity>>(emptyList())
 
+  private var lastSynced: String? = null
+
   override suspend fun insertStations(stations: List<StationEntity>) {
-    flowStations.value = stations
+    storedStations = (storedStations + stations).distinctBy { it.id }
+    flowStations.value = storedStations
+  }
+
+  override suspend fun clearAndInsert(
+    stations: List<StationEntity>,
+    connectors: List<ConnectorEntity>
+  ) {
+    // clear
+    storedStations = emptyList()
+    storedConnectors = emptyList()
+    flowStations.value = emptyList()
+    flowConnectors.value = emptyList()
+    // insert connectors first so they're ready when flowStations emits
+    storedConnectors = connectors
+    flowConnectors.value = connectors
     storedStations = stations
+    flowStations.value = stations
   }
 
   override suspend fun insertConnectors(connectors: List<ConnectorEntity>) {
-    flowConnectors.value = connectors
-    storedConnectors = connectors
+    storedConnectors = (storedConnectors + connectors).distinctBy { it.stationId to it.typeName }
+    flowConnectors.value = storedConnectors
+  }
+
+  override suspend fun insert(stations: List<StationEntity>, connectors: List<ConnectorEntity>) {
+    insertStations(stations)
+    insertConnectors(connectors)
   }
 
   override fun getStations(): Flow<List<StationEntity>> {
@@ -54,6 +78,14 @@ class FakeChargerDao: ChargerDao {
         )
       }
     }
+  }
+
+  override suspend fun getLastSyncedAt(): String? {
+    return lastSynced
+  }
+
+  override suspend fun setLastSyncedAt(value: String) {
+    lastSynced = value
   }
 
   fun getInsertedConnectors() = storedConnectors

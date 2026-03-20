@@ -20,14 +20,24 @@ buildkonfig {
 
     defaultConfigs {
         val localProperties = Properties()
-        localProperties.load(rootProject.file("local.properties").inputStream())
+        val localPropertiesFile = rootProject.file("local.properties")
+
+        // Only try to load if the file actually exists
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
 
         mapsApiKey = localProperties["MAP_API_KEY"].toString()
 
         buildConfigField(STRING, "API_BASE_URL", "https://ocm.tono.fyi")
-        buildConfigField(STRING, "API_KEY", localProperties["OCM_API_KEY"].toString())
         buildConfigField(STRING, "MAPS_API_KEY", mapsApiKey)
 
+        // Priority: 1. Environment Variable (CI) 2. local.properties (Local) 3. Empty fallback
+        val apiKey = System.getenv("OCM_API_KEY")
+            ?: localProperties["OCM_API_KEY"]?.toString()
+            ?: ""
+
+        buildConfigField(STRING, "API_KEY", apiKey)
     }
 }
 
@@ -130,6 +140,13 @@ kotlin {
     }
 }
 
+// Grab the run number, defaulting to 1 for local builds
+val runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "1"
+
+// Use the tag from release-please if available, otherwise fallback to 1.0.X
+val ciVersionName = System.getenv("VERSION_NAME") ?: "1.0.$runNumber"
+val ciVersionCode = runNumber.toIntOrNull() ?: 1
+
 android {
     namespace = "fyi.tono.stroppark"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -144,19 +161,32 @@ android {
         applicationId = "fyi.tono.stroppark"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
 
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+
+        versionCode = ciVersionCode
+        versionName = ciVersionName
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        create("release") {
+            storeFile = file("release.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {

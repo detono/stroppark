@@ -59,8 +59,15 @@ expect val platformModule: Module
 
 val featureModule = module {
   // ViewModels (Using factory because we want a fresh one per screen)
+  factory {
+    ChargerViewModel(
+      repository = get(),
+      locationService = get(),
+      locationPermission = get(),
+      logger = get { parametersOf("ChargerViewModel") }
+    )
+  }
   factoryOf(::ParkingViewModel)
-  factoryOf(::ChargerViewModel)
   factoryOf(::MapViewModel)
 }
 
