@@ -27,7 +27,7 @@ playServicesCoroutines = "1.10.2"
 room = "2.8.4"
 sqlite = "2.6.2"
 ksp = "2.3.0"
-uiTestManifest = "1.10.4"
+uiTestManifest = "1.10.5"
 buildKonfig = "0.17.1"
 
 [libraries]
