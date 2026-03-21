@@ -1,23 +1,30 @@
-# 1. Standard Android rules
+# Standard Android rules
 -keepattributes Signature
 -keepattributes *Annotation*
 -keepattributes EnclosingMethod,InnerClasses,SourceFile,LineNumberTable
 
-# 2. Kotlin Multiplatform / Coroutines
+# Kotlin Multiplatform / Coroutines
 -keepclassmembers class kotlinx.coroutines.** { *; }
 -keep class kotlinx.coroutines.internal.MainDispatcherFactory { *; }
 
-# 3. Compose (Usually handled by Gradle, but safe to have)
--keep class androidx.compose.runtime.** { *; }
+# Compose (Usually handled by Gradle, but safe to have)
 -dontwarn androidx.compose.ui.platform.**
 
-# 4. Kotlinx Serialization (If you use it for APIs)
--keepattributes *Annotation*,EnclosingMethod,InnerClasses
+# Kotlinx Serialization (If you use it for APIs)
 -keepclassmembers class fyi.tono.stroppark.** {
     *** Companion;
 }
 -keep @kotlinx.serialization.Serializable class fyi.tono.stroppark.** { *; }
 
-# 5. Room / Database (Based on your logs showing AppDatabase)
+# Room / Database (Based on your logs showing AppDatabase)
 -keep class * extends androidx.room.RoomDatabase
 -dontwarn androidx.room.paging.**
+
+# Ktor engine discovery (uses ServiceLoader reflection)
+-keep class io.ktor.client.engine.okhttp.OkHttpEngineContainer { *; }
+-keepclassmembers class io.ktor.client.engine.okhttp.OkHttpEngine { *; }
+
+# OkHttp internals that get stripped
+-keepnames class okhttp3.internal.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
