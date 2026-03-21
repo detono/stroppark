@@ -58,6 +58,9 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > composeApp/release.jks
 
+      - name: Decode google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > composeApp/google-services.json
+
       - name: Build Release Bundle (AAB)
         run: ./gradlew :composeApp:bundleRelease
         env:
