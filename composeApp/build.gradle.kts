@@ -11,6 +11,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.buildKonfig)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 buildkonfig {
@@ -70,6 +72,12 @@ kotlin {
 
             implementation(libs.play.services.location)
             implementation(libs.play.services.coroutines)
+
+            //Crashlytics
+            implementation(project.dependencies.platform(libs.firebase.bom))
+
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.analytics)
         }
         iosMain.dependencies {
             implementation(ktorLibs.client.darwin)

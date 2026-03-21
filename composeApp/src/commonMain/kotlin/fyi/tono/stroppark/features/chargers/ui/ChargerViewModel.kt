@@ -54,7 +54,7 @@ class ChargerViewModel(
       viewModelScope.launch {
         val userLoc = try {
           locationService.getCurrentLocation()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
           null
         }
 

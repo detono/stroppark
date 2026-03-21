@@ -7,6 +7,8 @@ import fyi.tono.stroppark.core.database.StropParkDatabase
 import fyi.tono.stroppark.core.getDatabaseBuilder
 import fyi.tono.stroppark.core.location.LocationService
 import fyi.tono.stroppark.core.location.LocationServiceImpl
+import fyi.tono.stroppark.core.utils.AndroidCrashReporter
+import fyi.tono.stroppark.core.utils.CrashReporter
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
@@ -18,6 +20,10 @@ actual val platformModule = module {
   }
 
   single { PermissionsController(applicationContext = androidApplication()) }
+
+  module {
+    single<CrashReporter> { AndroidCrashReporter() }
+  }
 }
 actual val platformDatabaseModule = module {
   single<RoomDatabase.Builder<StropParkDatabase>> {

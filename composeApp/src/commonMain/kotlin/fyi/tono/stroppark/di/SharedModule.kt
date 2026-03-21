@@ -49,7 +49,8 @@ val dataModule = module {
     ChargerRepositoryImpl(
       logger = get { parametersOf("ChargerRepositoryImpl") },
       httpClient = get(),
-      dao = get()
+      dao = get(),
+      crashReporter = get()
     )
   }
 }

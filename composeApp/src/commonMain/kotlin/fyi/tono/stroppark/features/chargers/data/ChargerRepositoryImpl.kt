@@ -3,6 +3,7 @@ package fyi.tono.stroppark.features.chargers.data
 import co.touchlab.kermit.Logger
 import fyi.tono.stroppark.BuildKonfig
 import fyi.tono.stroppark.core.network.dto.GhentResponse
+import fyi.tono.stroppark.core.utils.CrashReporter
 import fyi.tono.stroppark.features.chargers.database.ChargerDao
 import fyi.tono.stroppark.features.chargers.database.ConnectorEntity
 import fyi.tono.stroppark.features.chargers.database.StationEntity
@@ -21,7 +22,8 @@ import kotlin.time.Clock
 class ChargerRepositoryImpl(
   private val logger: Logger = Logger.withTag("ParkingRepositoryImpl"),
   private val httpClient: HttpClient,
-  private val dao: ChargerDao
+  private val dao: ChargerDao,
+  private val crashReporter: CrashReporter
 ): ChargerRepository {
   override suspend fun getChargers(): List<ChargerPoint> {
     val url = "https://data.stad.gent/api/explore/v2.1/catalog/datasets/laadpalen-gent/records"
@@ -47,6 +49,7 @@ class ChargerRepositoryImpl(
       results
     } catch (e: Exception) {
       logger.e("Failed to fetch chargers", e)
+      crashReporter.recordException(e)
       emptyList()
     }
   }
@@ -110,6 +113,7 @@ class ChargerRepositoryImpl(
         dao.setLastSyncedAt(now)
       }.onFailure { e ->
         logger.e("Failed to fetch chargers", e)
+        crashReporter.recordException(e)
       }
     }
   }
