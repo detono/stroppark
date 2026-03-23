@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/detono/stroppark/compare/v1.1.0...v1.2.0) (2026-03-22)
+
+
+### Features
+
+* add Crashlytics for error tracking and analytics ([5d5dcb2](https://github.com/detono/stroppark/commit/5d5dcb2b0e3f99c76293eac60c66df22e52bab40))
+
+
+### Bug Fixes
+
+* changes the rules proguard rules ([9aac5de](https://github.com/detono/stroppark/commit/9aac5de41f1580016bb497d027e629a964fa1f6f))
+* fixed the workflow for ci/cd ([262db7a](https://github.com/detono/stroppark/commit/262db7adf2e4f60c039aca270efa4853460f23f8))
+* fixed the workflow for ci/cd ([9e70b7f](https://github.com/detono/stroppark/commit/9e70b7fd99561aa1d746858ac767ec4e99383e7b))
+
 ## [1.1.0](https://github.com/detono/stroppark/compare/v1.0.0...v1.1.0) (2026-03-20)
 
 
