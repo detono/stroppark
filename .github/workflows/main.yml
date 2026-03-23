@@ -70,6 +70,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          OCM_API_KEY: ${{ secrets.OCM_API_KEY }}
           VERSION_NAME: ${{ needs.release-please.outputs.tag_name }}
 
       - name: Upload to Google Play Internal Testing
