@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/detono/stroppark/compare/v1.2.3...v1.2.4) (2026-03-23)
+
+
+### Bug Fixes
+
+* api key wasn't being handled by workflow to publish ([7f25023](https://github.com/detono/stroppark/commit/7f25023c70e6921b816c51ec1260dcf29f75728c))
+
 ## [1.2.3](https://github.com/detono/stroppark/compare/v1.2.2...v1.2.3) (2026-03-23)
 
 
