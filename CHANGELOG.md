@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/detono/stroppark/compare/v1.2.2...v1.2.3) (2026-03-23)
+
+
+### Bug Fixes
+
+* crash of chargers due to singleton ([e2102b5](https://github.com/detono/stroppark/commit/e2102b594114aab956f80376c8b8f59be6a148ef))
+
 ## [1.2.2](https://github.com/detono/stroppark/compare/v1.2.1...v1.2.2) (2026-03-23)
 
 
