@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/detono/stroppark/compare/v1.2.1...v1.2.2) (2026-03-23)
+
+
+### Bug Fixes
+
+* proguard fixing which created crash ([8f60b85](https://github.com/detono/stroppark/commit/8f60b852e664da052eb2850fcee64af20e4e6984))
+
 ## [1.2.1](https://github.com/detono/stroppark/compare/v1.2.0...v1.2.1) (2026-03-23)
 
 
