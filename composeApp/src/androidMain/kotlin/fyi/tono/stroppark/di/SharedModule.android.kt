@@ -21,9 +21,7 @@ actual val platformModule = module {
 
   single { PermissionsController(applicationContext = androidApplication()) }
 
-  module {
-    single<CrashReporter> { AndroidCrashReporter() }
-  }
+  single<CrashReporter> { AndroidCrashReporter() }
 }
 actual val platformDatabaseModule = module {
   single<RoomDatabase.Builder<StropParkDatabase>> {

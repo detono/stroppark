@@ -15,9 +15,7 @@ actual val platformModule = module {
 
   single { PermissionsController() }
 
-  module {
-    single<CrashReporter> { IosCrashReporter() }
-  }
+  single<CrashReporter> { IosCrashReporter() }
 }
 actual val platformDatabaseModule = module {
   single<RoomDatabase.Builder<StropParkDatabase>> {
