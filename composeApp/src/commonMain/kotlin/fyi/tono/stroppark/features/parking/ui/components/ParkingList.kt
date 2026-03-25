@@ -19,7 +19,6 @@ import fyi.tono.stroppark.features.parking.ui.ParkingTestTags
 import fyi.tono.stroppark.features.parking.ui.ParkingUiState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import stroppark.composeapp.generated.resources.Res
 import stroppark.composeapp.generated.resources.no_nav_app
 
