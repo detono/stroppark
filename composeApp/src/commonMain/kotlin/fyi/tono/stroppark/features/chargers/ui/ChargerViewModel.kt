@@ -7,20 +7,29 @@ import fyi.tono.stroppark.core.location.LocationPermissionService
 import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.core.location.LocationService
 import fyi.tono.stroppark.core.location.LocationUtils
+import fyi.tono.stroppark.core.utils.PermissionDialog
 import fyi.tono.stroppark.features.chargers.domain.ChargerRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ChargerViewModel(
   private val repository: ChargerRepository,
   private val locationService: LocationService,
@@ -37,44 +46,56 @@ class ChargerViewModel(
       LocationPermissionState.NotDetermined
     )
 
+  private val _dialogDismissed = MutableStateFlow(false)
+  val locationDialog = permissionState.combine(_dialogDismissed) { state, dismissed ->
+    if (dismissed) return@combine PermissionDialog.None
+    when (state) {
+      LocationPermissionState.Denied -> PermissionDialog.Rationale
+      LocationPermissionState.DeniedAlways -> PermissionDialog.Settings
+      else -> PermissionDialog.None
+    }
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PermissionDialog.None)
+
   private var pollingJob: Job? = null
 
   init {
-    repository.getStationFlow().onEach { stationsAndConnectors ->
-      val chargers = stationsAndConnectors.map { it.toUiModel() }
-
-      logger.i("Received ${chargers.size} chargers")
-
-      _uiState.update { currentState ->
-        currentState.copy(
-          chargers = chargers,
-          isLoading = false
-        )
+    val safeLocationFlow = permissionState.flatMapLatest { state ->
+      if (state == LocationPermissionState.Granted) {
+        locationService.getLocationFlow()
+          .onStart { emit(null) }
+          .catch { emit(null) }
+      } else {
+        flowOf(null)
       }
+    }
 
-      viewModelScope.launch {
-        val userLoc = try {
-          locationService.getCurrentLocation()
-        } catch (_: Exception) {
-          null
-        }
+    combine(
+      repository.getStationFlow(),
+      safeLocationFlow
+    ) { stations, location ->
+      val chargers = stations.map { it.toUiModel() }
 
-        _uiState.update { currentState ->
-          val mappedChargers = chargers.map { charger ->
-            val distance = if (userLoc != null && charger.latitude != null && charger.longitude != null) {
-              LocationUtils.calculateDistance(
-                userLoc.lat, userLoc.lon,
-                charger.latitude, charger.longitude
-              )
-            } else null
-            charger.copy(distanceKm = distance)
-          }.sortedBy { it.distanceKm ?: Double.MAX_VALUE }
+      location?.let { userLoc ->
+        chargers.map { charger ->
+          val distance = if (charger.latitude != null && charger.longitude != null) {
+            LocationUtils.calculateDistance(
+              userLoc.lat, userLoc.lon,
+              charger.latitude, charger.longitude
+            )
+          } else null
+          charger.copy(distanceKm = distance)
+        }.sortedBy { it.distanceKm ?: Double.MAX_VALUE }
+      } ?: chargers
 
-          currentState.copy(
-            chargers = mappedChargers,
-            isLoading = false
-          )
-        }
+    }.onEach { chargers ->
+      _uiState.update { it.copy(chargers = chargers, isLoading = false) }
+    }.launchIn(viewModelScope)
+
+    permissionState
+      .drop(1)
+      .onEach { state ->
+      if (state == LocationPermissionState.Granted) {
+        _dialogDismissed.update { false }
       }
     }.launchIn(viewModelScope)
   }
@@ -94,10 +115,13 @@ class ChargerViewModel(
       }
       ChargerAction.Refresh -> fetchData()
       ChargerAction.RequestLocationPermission -> {
+        _dialogDismissed.update { true }
         viewModelScope.launch {
           locationPermission.requestPermission()
         }
       }
+
+      ChargerAction.DismissDialog -> _dialogDismissed.update { true }
     }
   }
 
@@ -113,8 +137,11 @@ class ChargerViewModel(
     pollingJob?.cancel()
     pollingJob = viewModelScope.launch {
       while (isActive) {
-        fetchData(isSilent = _uiState.value.chargers.isNotEmpty())
-        delay(5 * 60 * 1000) // 5 Minutes
+        if (!_uiState.value.isLoading) {
+          fetchData(isSilent = _uiState.value.chargers.isNotEmpty())
+        }
+
+        delay(60 * 60 * 1000 * 24) // 24 Hours
       }
     }
   }
@@ -133,7 +160,7 @@ class ChargerViewModel(
       .catch { e ->
           _uiState.update { it.copy(isLoading = false, errorMessage = "Could not update: ${e.message}") }
       }
-      .launchIn(viewModelScope)
+      .collect()
     }
   }
 }
