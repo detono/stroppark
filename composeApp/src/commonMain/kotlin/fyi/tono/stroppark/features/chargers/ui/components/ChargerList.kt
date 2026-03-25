@@ -6,15 +6,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import fyi.tono.stroppark.core.location.getGeoUri
+import fyi.tono.stroppark.core.utils.LocalSnackbar
 import fyi.tono.stroppark.features.chargers.domain.ChargerFilter
 import fyi.tono.stroppark.features.chargers.ui.ChargerAction
 import fyi.tono.stroppark.features.chargers.ui.ChargerUiState
 import fyi.tono.stroppark.features.parking.ui.ParkingTestTags
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import stroppark.composeapp.generated.resources.Res
+import stroppark.composeapp.generated.resources.no_nav_app
 
 @Composable
 fun ChargerList(
@@ -44,6 +50,8 @@ fun ChargerList(
   }
 
   val uriHandler = LocalUriHandler.current
+  val snackBar = LocalSnackbar.current
+  val scope = rememberCoroutineScope()
 
   LazyColumn(
     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
@@ -74,6 +82,7 @@ fun ChargerList(
       )
     }
 
+
     items(filtered, key = { it.id }) { station ->
       ChargerItem(
         station = station,
@@ -82,7 +91,13 @@ fun ChargerList(
           val lng = station.longitude
 
           if (lat != null && lng != null) {
-            uriHandler.openUri(getGeoUri(lat, lng))
+            try {
+              uriHandler.openUri(getGeoUri(lat, lng))
+            } catch (_: IllegalArgumentException) {
+              scope.launch {
+                snackBar.showSnackbar(getString(Res.string.no_nav_app))
+              }
+            }
           }
         }
       )
