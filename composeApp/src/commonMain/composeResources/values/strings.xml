@@ -1,4 +1,12 @@
 <resources>
+    <string name="app_ok">OK</string>
+    <string name="app_no_thx">No thanks</string>
+    <string name="app_open_settings">Open Settings</string>
+    <string name="app_dismiss">Dismiss</string>
+
+    <string name="nav_item_parking">Car Parks</string>
+    <string name="nav_item_chargers">Chargers</string>
+
     <string name="parking_filter_available">Available</string>
     <string name="parking_filter_free">Free</string>
     <string name="parking_filter_lez">LEZ</string>
@@ -9,6 +17,14 @@
     <string name="charger_filter_kw_22">22kW+</string>
     <string name="charger_filter_kw_50">50kW+</string>
     <string name="charger_filter_kw_150">150kW+</string>
+    <string name="charger_sync_progress">Synchronising %1$d of %2$d chargers</string>
+    <string name="charger_sync_finalizing">Finalizing synchronization</string>
 
     <string name="no_nav_app">No navigation app found</string>
+
+    <string name="location_permission_title">Location needed</string>
+    <string name="location_permission_title_settings">Permission required</string>
+
+    <string name="charger_location_permission_text">We need your location to calculate distances to nearby chargers.</string>
+    <string name="charger_location_permission_perm_denied">You've permanently denied location access. Enable it in Settings to see distances.</string>
 </resources>
