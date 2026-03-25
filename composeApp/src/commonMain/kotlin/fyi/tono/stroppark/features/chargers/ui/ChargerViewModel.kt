@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -122,33 +123,17 @@ class ChargerViewModel(
     viewModelScope.launch {
       if (!isSilent) _uiState.update { it.copy(isLoading = true) }
 
-      try {
-        repository.refreshStations().fold(
-          onSuccess = {
-            _uiState.update {
-              it.copy(
-                isLoading = false,
-                errorMessage = null
-              )
-            }
-          },
-          onFailure = { throwable ->
-            throwable.message?.let { logger.e(it) }
-
-            _uiState.update { it.copy(
-              isLoading = false,
-              errorMessage = "An unexpected error occurred"
-            )}
-          }
-        )
-      } catch (e: Exception) {
-        _uiState.update {
-          it.copy(
-            isLoading = false,
-            errorMessage = "Could not update: ${e.message}"
-          )
+      repository.refreshStations().onEach { progress ->
+        if (progress.done) {
+          _uiState.update { it.copy(isLoading = false, syncProgress = null, errorMessage = null) }
+        } else {
+          _uiState.update { it.copy(syncProgress = progress) }
         }
       }
+      .catch { e ->
+          _uiState.update { it.copy(isLoading = false, errorMessage = "Could not update: ${e.message}") }
+      }
+      .launchIn(viewModelScope)
     }
   }
 }

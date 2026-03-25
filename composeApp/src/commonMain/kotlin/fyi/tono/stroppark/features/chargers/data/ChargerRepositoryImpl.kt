@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import fyi.tono.stroppark.BuildKonfig
 import fyi.tono.stroppark.core.network.dto.GhentResponse
 import fyi.tono.stroppark.core.utils.CrashReporter
+import fyi.tono.stroppark.core.utils.SyncProgress
 import fyi.tono.stroppark.features.chargers.database.ChargerDao
 import fyi.tono.stroppark.features.chargers.database.ConnectorEntity
 import fyi.tono.stroppark.features.chargers.database.StationEntity
@@ -15,6 +16,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
@@ -75,47 +79,50 @@ class ChargerRepositoryImpl(
 
   private val refreshMutex = Mutex()
 
-  override suspend fun refreshStations(): Result<Unit> {
-    if (refreshMutex.isLocked) return Result.success(Unit)
+  override suspend fun refreshStations(): Flow<SyncProgress> = flow {
+    if (refreshMutex.isLocked) return@flow
 
-    return refreshMutex.withLock {
-      runCatching {
-        val limit = 1000
-        var offset = 0
-        val allEntities = mutableListOf<StationEntity>()
-        val allConnectors = mutableListOf<ConnectorEntity>()
+    refreshMutex.withLock {
+      val limit = 1000
+      var offset = 0
+      var total = 0
+      val allEntities = mutableListOf<StationEntity>()
+      val allConnectors = mutableListOf<ConnectorEntity>()
+      val lastSynced = dao.getLastSyncedAt()
+      val now = Clock.System.now().toString()
 
-        val lastSynced = dao.getLastSyncedAt()
-        val now = Clock.System.now().toString()
+      do {
+        val response: ProxyDto = httpClient.get("${BuildKonfig.API_BASE_URL}/stations") {
+          header("X-API-KEY", BuildKonfig.API_KEY)
+          parameter("limit", limit)
+          parameter("offset", offset)
+          lastSynced?.let { parameter("modified_since", it) }
+        }.body()
+        total = response.total
 
-        do {
-          val response: ProxyDto = httpClient.get("${BuildKonfig.API_BASE_URL}/stations") {
-            header("X-API-KEY", BuildKonfig.API_KEY)
-            parameter("limit", limit)
-            parameter("offset", offset)
-            lastSynced?.let { parameter("modified_since", it) }
-          }.body()
-
-          allEntities += response.data.map { it.toEntity() }
-          allConnectors += response.data.flatMap { station ->
-            station.connectors.map { it.toEntity(station.id) }
-          }
-
-          offset += response.data.size
-        } while (offset < response.total)
-
-        if (lastSynced == null) {
-          dao.clearAndInsert(allEntities, allConnectors)
-        } else {
-          dao.insert(allEntities, allConnectors)
+        allEntities += response.data.map { it.toEntity() }
+        allConnectors += response.data.flatMap { station ->
+          station.connectors.map { it.toEntity(station.id) }
         }
 
-        dao.setLastSyncedAt(now)
-      }.onFailure { e ->
-        logger.e("Failed to fetch chargers", e)
-        crashReporter.recordException(e)
+        offset += response.data.size
+
+        emit(SyncProgress(loaded = offset, total = total))
+      } while (offset < total)
+
+      if (lastSynced == null) {
+        dao.clearAndInsert(allEntities, allConnectors)
+      } else {
+        dao.insert(allEntities, allConnectors)
       }
+
+      emit(SyncProgress(loaded = offset, total = total, done = true))
+
+      dao.setLastSyncedAt(now)
     }
+  }.catch { e ->
+    logger.e("Failed to fetch chargers", e)
+    crashReporter.recordException(e)
   }
 
   override fun getStationFlow() = dao.getStationsWithConnectors()
