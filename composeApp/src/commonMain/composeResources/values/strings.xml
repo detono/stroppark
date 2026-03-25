@@ -9,4 +9,6 @@
     <string name="charger_filter_kw_22">22kW+</string>
     <string name="charger_filter_kw_50">50kW+</string>
     <string name="charger_filter_kw_150">150kW+</string>
+
+    <string name="no_nav_app">No navigation app found</string>
 </resources>
