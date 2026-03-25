@@ -102,6 +102,7 @@ kotlin {
             implementation(ktorLibs.client.logging)
             implementation(ktorLibs.client.contentNegotiation)
             implementation(ktorLibs.serialization.kotlinx.json)
+            implementation(ktorLibs.client.encoding)
 
 
             //Koin
@@ -182,8 +183,8 @@ android {
     }
     buildTypes {
         debug {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
