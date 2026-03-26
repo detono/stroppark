@@ -4,9 +4,12 @@ import fyi.tono.stroppark.fakes.FakeChargerRepository
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
 import fyi.tono.stroppark.features.core.ui.BaseViewModelTests
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -51,7 +54,7 @@ class ChargerViewModelTests : BaseViewModelTests() {
   }
 
   @Test
-  fun `fetchData failure updates errorMessage`() = runTest {
+  fun `fetchData failure updates errorMessage`() = runTest(testDispatcher) {
     fakeRepository.shouldReturnError = true
 
     viewModel.fetchData()
@@ -60,6 +63,6 @@ class ChargerViewModelTests : BaseViewModelTests() {
 
     val currentState = viewModel.uiState.value
     assertEquals(false, currentState.isLoading, "isLoading should be false")
-    assertEquals("An unexpected error occurred", currentState.errorMessage, "errorMessage doesn't match")
+    assertEquals("Could not update: Network Fail", currentState.errorMessage, "errorMessage doesn't match")
   }
 }

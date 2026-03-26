@@ -1,8 +1,11 @@
 package fyi.tono.stroppark.features.chargers.data
 
 import fyi.tono.stroppark.fakes.FakeChargerDao
+import fyi.tono.stroppark.fakes.FakeCrashReporter
 import fyi.tono.stroppark.features.core.data.BaseRepositoryImplTests
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -11,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
   private val CHARGER_JSON = """
         {
@@ -123,6 +127,7 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
   """.trimIndent()
 
   private lateinit var fakeChargerDao: FakeChargerDao
+  private val fakeReporter = FakeCrashReporter()
   @BeforeTest
   fun setup() {
     fakeChargerDao = FakeChargerDao()
@@ -135,7 +140,7 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao, crashReporter = fakeReporter)
     val result = repo.getChargers()
 
     assertEquals(1, result.size)
@@ -151,7 +156,7 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       HttpStatusCode.InternalServerError
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao, crashReporter = fakeReporter)
     val result = repo.getChargers()
 
     assertTrue(result.isEmpty(), "Expected empty list on server error")
@@ -164,8 +169,8 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
-    repo.refreshStations()
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao, crashReporter = fakeReporter)
+    repo.refreshStations().collect()
 
     val connectors = fakeChargerDao.getInsertedConnectors()
     val stations = fakeChargerDao.getInsertedStations()
@@ -181,8 +186,8 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
-    repo.refreshStations()
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao, crashReporter = fakeReporter)
+    repo.refreshStations().collect()
 
     assertNotNull(fakeChargerDao.getLastSyncedAt())
   }
@@ -194,16 +199,23 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
+    val repo = ChargerRepositoryImpl(
+      httpClient = client,
+      dao = fakeChargerDao,
+      crashReporter = fakeReporter,
+    )
 
     // first call — full fetch, clears and inserts
-    repo.refreshStations()
-    assertEquals(2, fakeChargerDao.getInsertedStations().size)
+    repo.refreshStations().collect()
+
+
+    assertEquals(2, fakeChargerDao.getInsertedStations().size, "expected 2 stations")
     assertNotNull(fakeChargerDao.getLastSyncedAt())
 
     // second call — delta fetch, should still have same data
-    repo.refreshStations()
-    assertEquals(2, fakeChargerDao.getInsertedStations().size)
+    repo.refreshStations().collect()
+
+    assertEquals(2, fakeChargerDao.getInsertedStations().size, "still expecting 2 stations")
   }
 
   @Test
@@ -213,8 +225,8 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
-    repo.refreshStations()
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao, crashReporter = fakeReporter)
+    repo.refreshStations().collect()
 
     val connectors = fakeChargerDao.getInsertedConnectors()
     val stations = fakeChargerDao.getInsertedStations()
@@ -314,8 +326,8 @@ class ChargerRepositoryImplTests: BaseRepositoryImplTests() {
       statusCode = HttpStatusCode.OK
     )
 
-    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao)
-    repo.refreshStations()
+    val repo = ChargerRepositoryImpl(httpClient = client, dao = fakeChargerDao, crashReporter = fakeReporter)
+    repo.refreshStations().collect()
 
     val stationsWithConnectors = fakeChargerDao.getStationsWithConnectors().first()
 

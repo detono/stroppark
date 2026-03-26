@@ -13,6 +13,10 @@ import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
@@ -20,7 +24,6 @@ actual class LocationServiceImpl(
   private val context: Context,
   private val logger: Logger = Logger.withTag("LocationService")
 ) : LocationService {
-
   @SuppressLint("MissingPermission")
   actual override suspend fun getCurrentLocation(): GhentCoordinatesDto? {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -63,4 +66,41 @@ actual class LocationServiceImpl(
       fusedLocationClient.removeLocationUpdates(callback)
     }
   }
+
+  @SuppressLint("MissingPermission")
+  actual override fun getLocationFlow(): Flow<GhentCoordinatesDto?> = callbackFlow {
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
+    val locationRequest = LocationRequest.Builder(
+      Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+      10_000L
+    ).apply {
+      setMinUpdateDistanceMeters(100f)
+    }.build()
+
+    val callback = object : LocationCallback() {
+      override fun onLocationResult(result: LocationResult) {
+        result.lastLocation?.let { loc ->
+          trySend(GhentCoordinatesDto(loc.latitude, loc.longitude))
+        }
+      }
+    }
+
+    try {
+      fusedLocationClient.requestLocationUpdates(
+        locationRequest,
+        callback,
+        Looper.getMainLooper()
+      )
+      logger.i("Started location flow updates")
+    } catch (e: Exception) {
+      logger.e("Failed to start location updates", e)
+      close(e)
+    }
+
+    awaitClose {
+      logger.i("Stopping location flow updates to save battery")
+      fusedLocationClient.removeLocationUpdates(callback)
+    }
+  }.conflate()
 }

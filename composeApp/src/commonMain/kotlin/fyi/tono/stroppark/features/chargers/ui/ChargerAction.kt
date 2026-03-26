@@ -6,4 +6,5 @@ sealed interface ChargerAction {
   data class ToggleFilter(val filter: ChargerFilter) : ChargerAction
   data object Refresh : ChargerAction
   data object RequestLocationPermission: ChargerAction
+  data object DismissDialog: ChargerAction
 }

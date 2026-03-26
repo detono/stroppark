@@ -11,6 +11,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.buildKonfig)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 var mapsApiKey = ""
@@ -75,6 +77,12 @@ kotlin {
 
             implementation(libs.play.services.location)
             implementation(libs.play.services.coroutines)
+
+            //Crashlytics
+            implementation(project.dependencies.platform(libs.firebase.bom))
+
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.analytics)
         }
         iosMain.dependencies {
             implementation(ktorLibs.client.darwin)
@@ -99,6 +107,7 @@ kotlin {
             implementation(ktorLibs.client.logging)
             implementation(ktorLibs.client.contentNegotiation)
             implementation(ktorLibs.serialization.kotlinx.json)
+            implementation(ktorLibs.client.encoding)
 
 
             //Koin
@@ -183,6 +192,14 @@ android {
         }
     }
     buildTypes {
+        debug {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
         release {
             isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")

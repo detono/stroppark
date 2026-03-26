@@ -5,5 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocationService {
   suspend fun getCurrentLocation(): GhentCoordinatesDto?
+  fun getLocationFlow(): Flow<GhentCoordinatesDto?>
   fun getLocationUpdates(intervalMs: Long): Flow<GhentCoordinatesDto?>
 }
+

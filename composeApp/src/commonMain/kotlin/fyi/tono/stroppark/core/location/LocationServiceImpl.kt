@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 expect class LocationServiceImpl: LocationService {
   override suspend fun getCurrentLocation(): GhentCoordinatesDto?
   override fun getLocationUpdates(intervalMs: Long): Flow<GhentCoordinatesDto?>
+  override fun getLocationFlow(): Flow<GhentCoordinatesDto?>
 }

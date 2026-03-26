@@ -1,23 +1,36 @@
-# 1. Standard Android rules
--keepattributes Signature
--keepattributes *Annotation*
--keepattributes EnclosingMethod,InnerClasses,SourceFile,LineNumberTable
+# Standard Android & Attributes
+-keepattributes Signature, *Annotation*, EnclosingMethod, InnerClasses, SourceFile, LineNumberTable
 
-# 2. Kotlin Multiplatform / Coroutines
+# Kotlin Multiplatform / Coroutines
 -keepclassmembers class kotlinx.coroutines.** { *; }
 -keep class kotlinx.coroutines.internal.MainDispatcherFactory { *; }
 
-# 3. Compose (Usually handled by Gradle, but safe to have)
--keep class androidx.compose.runtime.** { *; }
--dontwarn androidx.compose.ui.platform.**
-
-# 4. Kotlinx Serialization (If you use it for APIs)
--keepattributes *Annotation*,EnclosingMethod,InnerClasses
+# Kotlinx Serialization
 -keepclassmembers class fyi.tono.stroppark.** {
     *** Companion;
 }
 -keep @kotlinx.serialization.Serializable class fyi.tono.stroppark.** { *; }
 
-# 5. Room / Database (Based on your logs showing AppDatabase)
+# Room / Database
 -keep class * extends androidx.room.RoomDatabase
 -dontwarn androidx.room.paging.**
+
+# Network (Ktor/OkHttp)
+-keep class io.ktor.client.engine.okhttp.OkHttpEngineContainer { *; }
+-keepnames class okhttp3.internal.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# Koin
+-keepnames class org.koin.**
+-keepclassmembers class org.koin.** { *; }
+-dontwarn org.koin.**
+
+-keepnames class fyi.tono.stroppark.**
+-keepclassmembers class fyi.tono.stroppark.** {
+    public <init>(...);
+}
+
+# Explicitly protect the reporter and utils
+-keep class fyi.tono.stroppark.core.utils.CrashReporter { *; }
+-keep class fyi.tono.stroppark.core.utils.** { *; }

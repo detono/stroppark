@@ -10,4 +10,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.androidx.room) apply false
     alias(libs.plugins.buildKonfig) apply false
+
+    alias(libs.plugins.googleServices) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }

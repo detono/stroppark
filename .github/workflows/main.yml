@@ -12,6 +12,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Decode google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > composeApp/google-services.json
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -58,12 +61,16 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > composeApp/release.jks
 
+      - name: Decode google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > composeApp/google-services.json
+
       - name: Build Release Bundle (AAB)
         run: ./gradlew :composeApp:bundleRelease
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          OCM_API_KEY: ${{ secrets.OCM_API_KEY }}
           VERSION_NAME: ${{ needs.release-please.outputs.tag_name }}
 
       - name: Upload to Google Play Internal Testing
