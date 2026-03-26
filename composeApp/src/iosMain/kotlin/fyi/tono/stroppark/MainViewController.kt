@@ -5,7 +5,10 @@ import fyi.tono.stroppark.di.sharedModules
 import org.koin.core.context.startKoin
 
 fun MainViewController() = ComposeUIViewController(
-  configure = { initKoin() },
+  configure = {
+    initKoin()
+    GMSServices.provideAPIKey(BuildKonfig.MAPS_API_KEY)
+  },
   content = {
     App()
   }

@@ -1,22 +1,25 @@
 package fyi.tono.stroppark.features.parking.ui.screens
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import fyi.tono.stroppark.core.location.LocationPermissionState
+import fyi.tono.stroppark.core.ui.components.organisms.LocationPermissionDialog
+import fyi.tono.stroppark.core.utils.PermissionDialog
+import fyi.tono.stroppark.core.utils.openAppSettings
 import fyi.tono.stroppark.features.parking.ui.ParkingAction
 import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import stroppark.composeapp.generated.resources.Res
+import stroppark.composeapp.generated.resources.app_dismiss
+import stroppark.composeapp.generated.resources.app_no_thx
+import stroppark.composeapp.generated.resources.app_ok
+import stroppark.composeapp.generated.resources.app_open_settings
+import stroppark.composeapp.generated.resources.location_permission_title
+import stroppark.composeapp.generated.resources.location_permission_title_settings
+import stroppark.composeapp.generated.resources.parking_location_permission_text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,68 +33,35 @@ fun ParkingListScreen(viewModel: ParkingViewModel = koinViewModel ()) {
     viewModel.onLifecycleEvent(isForeground = false)
   }
 
-  LaunchedEffect(Unit) {
-    viewModel.fetchData()
-  }
-
-  //region Rationale
-  var showRationale by remember { mutableStateOf(false) }
-  var showSettingsPrompt by remember { mutableStateOf(false) }
-  val permissionState by viewModel.permissionState.collectAsState()
-  LaunchedEffect(permissionState) {
-    when (permissionState) {
-      LocationPermissionState.Granted -> {
-        viewModel.fetchData()
-      }
-      LocationPermissionState.DeniedAlways -> {
-        showSettingsPrompt = true
-      }
-      LocationPermissionState.NotDetermined -> {
-        viewModel.onAction(ParkingAction.RequestLocationPermission)
-      }
-      LocationPermissionState.Denied -> {
-        showRationale = true
-      }
-      LocationPermissionState.NotGranted -> {
-        viewModel.onAction(ParkingAction.RequestLocationPermission)
-      }
-    }
-  }
-
-  if (showRationale) {
-    AlertDialog(
-      onDismissRequest = { showRationale = false },
-      title = { Text("Location needed") },
-      text = { Text("We need your location to calculate distances to nearby parking.") },
-      confirmButton = {
-        TextButton(onClick = {
-          showRationale = false
+  val locationDialog by viewModel.locationDialog.collectAsState()
+  when (locationDialog) {
+    PermissionDialog.Rationale -> {
+      LocationPermissionDialog(
+        title = Res.string.location_permission_title,
+        text = Res.string.parking_location_permission_text,
+        confirmText = Res.string.app_ok,
+        dismissText = Res.string.app_no_thx,
+        onConfirm = {
           viewModel.onAction(ParkingAction.RequestLocationPermission)
-        }) { Text("OK") }
-      },
-      dismissButton = {
-        TextButton(onClick = { showRationale = false }) { Text("No thanks") }
-      }
-    )
+        },
+        onDismiss = { viewModel.onAction(ParkingAction.DismissDialog) }
+      )
+    }
+    PermissionDialog.Settings -> {
+      LocationPermissionDialog(
+        title = Res.string.location_permission_title_settings,
+        text = Res.string.parking_location_permission_text,
+        confirmText = Res.string.app_open_settings,
+        dismissText = Res.string.app_dismiss,
+        onConfirm = {
+          viewModel.onAction(ParkingAction.DismissDialog)
+          openAppSettings()
+        },
+        onDismiss = { viewModel.onAction(ParkingAction.DismissDialog) }
+      )
+    }
+    PermissionDialog.None -> Unit
   }
-
-  if (showSettingsPrompt) {
-    AlertDialog(
-      onDismissRequest = { showSettingsPrompt = false },
-      title = { Text("Permission required") },
-      text = { Text("You've permanently denied location access. Enable it in Settings to see distances.") },
-      confirmButton = {
-        TextButton(onClick = {
-          showSettingsPrompt = false
-
-        }) { Text("Open Settings") }
-      },
-      dismissButton = {
-        TextButton(onClick = { showSettingsPrompt = false }) { Text("Dismiss") }
-      }
-    )
-  }
-  //endregion
 
   ParkingListScreenContent(
     uiState = uiState,

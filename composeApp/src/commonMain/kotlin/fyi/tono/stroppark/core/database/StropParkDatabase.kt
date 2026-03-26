@@ -27,7 +27,10 @@ abstract class StropParkDatabase: RoomDatabase() {
 }
 
 // The Room compiler generates the `actual` implementations.
-@Suppress("KotlinNoActualForExpect")
+@Suppress(
+  "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
+  "KotlinNoActualForExpect"
+)
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<StropParkDatabase> {
   override fun initialize(): StropParkDatabase
 }

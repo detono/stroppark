@@ -16,7 +16,9 @@ data class ChargerUiModel(
   val fastestChargerKw: Double?,
   val connectorSummary: String,
   val hasFastCharge: Boolean,
-)
+) {
+  val hasCoordinates = latitude != null && longitude != null
+}
 
 fun StationWithConnectors.toUiModel() = ChargerUiModel(
   id = station.id,

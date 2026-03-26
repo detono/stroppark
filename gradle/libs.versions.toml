@@ -12,6 +12,7 @@ androidx-testExt = "1.3.0"
 composeMultiplatform = "1.10.1"
 composeIconsExtended = "1.7.3"
 junit = "4.13.2"
+kmpMapsCompose = "0.5.0"
 kotlin = "2.3.10"
 kotlinxDatetime = "0.7.1"
 material3 = "1.10.0-alpha05"
@@ -34,6 +35,8 @@ crashlytics = "3.0.6"
 firebaseBom = "32.8.0"
 [libraries]
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
+kmp-maps-compose = { module = "eu.buney.maps:kmp-maps-compose", version.ref = "kmpMapsCompose" }
+kmp-maps-compose-utils = { module = "eu.buney.maps:kmp-maps-compose-utils", version.ref = "kmpMapsCompose" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -67,6 +70,7 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+
 permissions-location = { module = "dev.icerock.moko:permissions-location", version.ref = "permissionsLocation" }
 permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "permissionsLocation" }
 permissions-test = { module = "dev.icerock.moko:permissions-test", version.ref = "permissionsLocation" }

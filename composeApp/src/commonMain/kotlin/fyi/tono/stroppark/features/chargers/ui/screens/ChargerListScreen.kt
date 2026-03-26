@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -30,6 +31,7 @@ import fyi.tono.stroppark.core.ui.components.organisms.LocationPermissionDialog
 import fyi.tono.stroppark.core.utils.PermissionDialog
 import fyi.tono.stroppark.core.utils.openAppSettings
 import fyi.tono.stroppark.features.chargers.ui.ChargerAction
+import fyi.tono.stroppark.features.chargers.ui.ChargerTestTags
 import fyi.tono.stroppark.features.chargers.ui.ChargerViewModel
 import fyi.tono.stroppark.features.chargers.ui.components.ChargerList
 import org.jetbrains.compose.resources.stringResource
@@ -100,7 +102,7 @@ fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
         uiState.isLoading && uiState.chargers.isEmpty() -> {
           uiState.syncProgress?.let {
             Box(
-              modifier = Modifier.fillMaxSize(),
+              modifier = Modifier.fillMaxSize().testTag(ChargerTestTags.SYNC_PROGRESS_CARD),
               contentAlignment = Alignment.Center,
               content = {
                 Card(
@@ -126,6 +128,7 @@ fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
                         }
 
                         CircularProgressIndicator(
+                          modifier = Modifier.testTag(ChargerTestTags.LOADING_SPINNER),
                           progress = { it.loaded.toFloat() / it.total.toFloat() },
                           color = ProgressIndicatorDefaults.circularColor,
                           strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth,
@@ -144,7 +147,9 @@ fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
               }
             )
           } ?: run {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularProgressIndicator(
+              modifier = Modifier.align(Alignment.Center).testTag(ChargerTestTags.LOADING_SPINNER)
+            )
           }
         }
 
@@ -154,6 +159,7 @@ fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
 
         else -> {
           ChargerList(
+            modifier = Modifier.testTag(ChargerTestTags.CHARGER_LIST),
             uiState = uiState,
             onAction = viewModel::onAction
           )
@@ -166,6 +172,7 @@ fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
           modifier = Modifier
             .fillMaxWidth()
             .align(Alignment.BottomCenter)
+            .testTag(ChargerTestTags.ERROR_BANNER)
         ) {
           Text(
             text = uiState.errorMessage!!,

@@ -7,6 +7,11 @@ import fyi.tono.stroppark.fakes.FakeParkingRepository
 import fyi.tono.stroppark.features.core.ui.BaseViewModelTests
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -14,6 +19,7 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ParkingViewModelTests: BaseViewModelTests() {
   private lateinit var viewModel: ParkingViewModel
   private lateinit var fakeRepository: FakeParkingRepository
@@ -42,6 +48,10 @@ class ParkingViewModelTests: BaseViewModelTests() {
 
   @Test
   fun `database updates flow into uiState automatically`() = runTest {
+    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+
+    fakePermissionService.state.value = LocationPermissionState.Granted
+
     val testData = listOf(
       ParkingLocation(
         id = "1",
@@ -61,6 +71,7 @@ class ParkingViewModelTests: BaseViewModelTests() {
     assertEquals("Vrijdagmarkt", currentState.parkingSpots.first().name)
 
     assertNotNull(currentState.parkingSpots.first().distanceKm)
+    collectJob.cancel()
   }
 
   @Test
@@ -85,6 +96,8 @@ class ParkingViewModelTests: BaseViewModelTests() {
 
   @Test
   fun `spots are sorted by distance closest first`() = runTest {
+    fakePermissionService.state.value = LocationPermissionState.Granted
+
     val testData = listOf(
       ParkingLocation(
         id = "1", name = "Far Away",
@@ -104,8 +117,10 @@ class ParkingViewModelTests: BaseViewModelTests() {
     )
 
     fakeRepository.dbFlow.emit(testData)
+    advanceUntilIdle()
 
     val spots = viewModel.uiState.value.parkingSpots
+    assertEquals(3, spots.size)
     assertEquals("Nearby", spots[0].name)
     assertEquals("Medium", spots[1].name)
     assertEquals("Far Away", spots[2].name)

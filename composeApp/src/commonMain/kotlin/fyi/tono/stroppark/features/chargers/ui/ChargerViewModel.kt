@@ -108,7 +108,7 @@ class ChargerViewModel(
             current.activeFilters - action.filter
           } else (
               current.activeFilters + action.filter
-              )
+          )
 
           current.copy(activeFilters = newFilters)
         }
@@ -146,21 +146,19 @@ class ChargerViewModel(
     }
   }
 
-  fun fetchData(isSilent: Boolean = false) {
-    viewModelScope.launch {
-      if (!isSilent) _uiState.update { it.copy(isLoading = true) }
+  fun fetchData(isSilent: Boolean = false) = viewModelScope.launch {
+    if (!isSilent) _uiState.update { it.copy(isLoading = true) }
 
-      repository.refreshStations().onEach { progress ->
-        if (progress.done) {
-          _uiState.update { it.copy(isLoading = false, syncProgress = null, errorMessage = null) }
-        } else {
-          _uiState.update { it.copy(syncProgress = progress) }
-        }
+    repository.refreshStations().onEach { progress ->
+      if (progress.done) {
+        _uiState.update { it.copy(isLoading = false, syncProgress = null, errorMessage = null) }
+      } else {
+        _uiState.update { it.copy(syncProgress = progress) }
       }
-      .catch { e ->
-          _uiState.update { it.copy(isLoading = false, errorMessage = "Could not update: ${e.message}") }
-      }
-      .collect()
     }
+    .catch { e ->
+        _uiState.update { it.copy(isLoading = false, errorMessage = "Could not update: ${e.message}") }
+    }
+    .collect()
   }
 }
