@@ -7,6 +7,8 @@ import fyi.tono.stroppark.fakes.FakeParkingRepository
 import fyi.tono.stroppark.features.core.ui.BaseViewModelTests
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -42,6 +44,8 @@ class ParkingViewModelTests: BaseViewModelTests() {
 
   @Test
   fun `database updates flow into uiState automatically`() = runTest {
+    fakePermissionService.state.value = LocationPermissionState.Granted
+
     val testData = listOf(
       ParkingLocation(
         id = "1",
@@ -83,8 +87,11 @@ class ParkingViewModelTests: BaseViewModelTests() {
     assertEquals("Network Fail", currentState.errorMessage)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `spots are sorted by distance closest first`() = runTest {
+    fakePermissionService.state.value = LocationPermissionState.Granted
+
     val testData = listOf(
       ParkingLocation(
         id = "1", name = "Far Away",
@@ -104,6 +111,7 @@ class ParkingViewModelTests: BaseViewModelTests() {
     )
 
     fakeRepository.dbFlow.emit(testData)
+    advanceUntilIdle()
 
     val spots = viewModel.uiState.value.parkingSpots
     assertEquals("Nearby", spots[0].name)

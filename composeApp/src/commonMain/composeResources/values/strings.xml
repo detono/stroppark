@@ -28,6 +28,8 @@
     <string name="location_permission_title">Location needed</string>
     <string name="location_permission_title_settings">Permission required</string>
 
+    <string name="parking_location_permission_text">We need your location to calculate distances to nearby parking.</string>
     <string name="charger_location_permission_text">We need your location to calculate distances to nearby chargers.</string>
+    <string name="parking_location_permission_perm_denied">You've permanently denied location access. Enable it in Settings to see distances.</string>
     <string name="charger_location_permission_perm_denied">You've permanently denied location access. Enable it in Settings to see distances.</string>
 </resources>
