@@ -12,6 +12,7 @@ import platform.Foundation.*
 import platform.darwin.NSObject
 import kotlin.coroutines.resume
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class LocationServiceImpl: LocationService {
   private val locationManager = CLLocationManager()
 
@@ -74,7 +75,7 @@ actual class LocationServiceImpl: LocationService {
   }
 
   @OptIn(ExperimentalForeignApi::class)
-  actual override fun getLocationUpdates(intervalMs: Long): Flow<GhentCoordinatesDto?> = callbackFlow {
+  actual override fun getLocationFlow(): Flow<GhentCoordinatesDto?> = callbackFlow {
     val delegate = object : NSObject(), CLLocationManagerDelegateProtocol {
       override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
         val location = didUpdateLocations.lastOrNull() as? CLLocation

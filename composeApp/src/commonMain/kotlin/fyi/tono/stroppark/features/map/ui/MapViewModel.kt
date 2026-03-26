@@ -122,7 +122,7 @@ class MapViewModel(
     pollingJob?.cancel()
 
     pollingJob = viewModelScope.launch(Dispatchers.IO) {
-      locationService.getLocationUpdates(5_000)
+      locationService.getLocationFlow()
         .onEach { location ->
           location?.let {
             _uiState.update { curState ->

@@ -14,9 +14,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
@@ -41,41 +38,15 @@ actual class LocationServiceImpl(
   }
 
   @SuppressLint("MissingPermission")
-  actual override fun getLocationUpdates(intervalMs: Long): Flow<GhentCoordinatesDto?> = callbackFlow {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, intervalMs)
-      .build()
-
-    val callback = object : LocationCallback() {
-      override fun onLocationResult(result: LocationResult) {
-        result.lastLocation?.let { location ->
-          trySend(GhentCoordinatesDto(location.latitude, location.longitude))
-        }
-      }
-    }
-
-    fusedLocationClient.requestLocationUpdates(
-      locationRequest,
-      callback,
-      Looper.getMainLooper()
-    ).addOnFailureListener { e ->
-      close(e)
-    }
-
-    awaitClose {
-      fusedLocationClient.removeLocationUpdates(callback)
-    }
-  }
-
-  @SuppressLint("MissingPermission")
   actual override fun getLocationFlow(): Flow<GhentCoordinatesDto?> = callbackFlow {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     val locationRequest = LocationRequest.Builder(
       Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-      10_000L
+      5_000L
     ).apply {
-      setMinUpdateDistanceMeters(100f)
+      setMinUpdateIntervalMillis(2_000L)
+      setMinUpdateDistanceMeters(30f)
     }.build()
 
     val callback = object : LocationCallback() {
