@@ -18,6 +18,7 @@ import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
 import fyi.tono.stroppark.fakes.FakeParkingRepository
 import fyi.tono.stroppark.features.core.ui.BaseUiTests
+import fyi.tono.stroppark.features.core.ui.setContentWithSnackbar
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
 import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 import fyi.tono.stroppark.features.parking.ui.screens.ParkingListScreen
@@ -85,7 +86,7 @@ class ParkingListScreenTest: BaseUiTests() {
 
   @Test
   fun `renders parking cards correctly with capacity labels`() = runComposeUiTest {
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(
         uiState = ParkingUiState(isLoading = false, parkingSpots = testSpots),
         onAction = {}
@@ -114,7 +115,7 @@ class ParkingListScreenTest: BaseUiTests() {
       activeFilters = setOf(ParkingFilter.FREE)
     )
 
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(uiState = uiState, onAction = {})
     }
 
@@ -131,8 +132,10 @@ class ParkingListScreenTest: BaseUiTests() {
       activeFilters = setOf()
     )
 
-    setContent {
+    setContentWithSnackbar {
+
       ParkingListScreenContent(uiState = uiState, onAction = {})
+
     }
 
     onNodeWithTag(ParkingFilter.FREE.name).assertExists()
@@ -146,7 +149,7 @@ class ParkingListScreenTest: BaseUiTests() {
       activeFilters = setOf()
     )
 
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(uiState = uiState, onAction = {})
     }
 
@@ -163,7 +166,7 @@ class ParkingListScreenTest: BaseUiTests() {
       activeFilters = setOf(ParkingFilter.FREE)
     )
 
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(uiState = uiState, onAction = { capturedAction = it })
     }
 
@@ -183,7 +186,7 @@ class ParkingListScreenTest: BaseUiTests() {
       activeFilters = setOf(ParkingFilter.AVOID_LEZ)
     )
 
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(uiState = uiState, onAction = { capturedActions.add(it) })
     }
 
@@ -206,7 +209,7 @@ class ParkingListScreenTest: BaseUiTests() {
       override fun openUri(uri: String) { openedUri = uri }
     }
 
-    setContent {
+    setContentWithSnackbar {
       CompositionLocalProvider(LocalUriHandler provides fakeUriHandler) {
         ParkingListScreenContent(
           uiState = ParkingUiState(isLoading = false, parkingSpots = listOf(testSpots.first())),
@@ -230,7 +233,7 @@ class ParkingListScreenTest: BaseUiTests() {
       parkingSpots = testSpots
     )
 
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(
         uiState = uiState,
         onAction = { capturedAction = it }
@@ -253,7 +256,7 @@ class ParkingListScreenTest: BaseUiTests() {
       errorMessage = null,
     )
 
-    setContent {
+    setContentWithSnackbar {
       ParkingListScreenContent(
         uiState = uiState,
         onAction = {}
@@ -283,7 +286,7 @@ class ParkingListScreenTest: BaseUiTests() {
     //Overwrite with our module
     loadKoinModules(testModule)
 
-    setContent {
+    setContentWithSnackbar {
         ParkingListScreen()
     }
 
