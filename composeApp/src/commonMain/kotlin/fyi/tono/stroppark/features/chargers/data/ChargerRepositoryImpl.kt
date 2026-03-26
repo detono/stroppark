@@ -16,15 +16,19 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.yield
 import kotlin.time.Clock
 
 class ChargerRepositoryImpl(
@@ -89,8 +93,9 @@ class ChargerRepositoryImpl(
     try {
       val now = Clock.System.now().toString()
       val lastSynced = dao.getLastSyncedAt()
-      val limit = 5_000
+      val limit = 2_000
 
+      logger.i("refreshStations() - starting sync")
 
       val initialResponse: ProxyDto = httpClient.get("${BuildKonfig.API_BASE_URL}/stations") {
         header("X-API-KEY", BuildKonfig.API_KEY)
@@ -100,6 +105,8 @@ class ChargerRepositoryImpl(
       }.body()
 
       val total = initialResponse.total
+
+      logger.i("refreshStations() - received ${initialResponse.data.size}/$total chargers")
 
       if (total == 0) {
         emit(SyncProgress(loaded = 0, total = total, done = true))
@@ -141,16 +148,21 @@ class ChargerRepositoryImpl(
           }
 
           loaded += data.size
+          logger.i("refreshStations() - received $loaded/$total chargers")
           emit(SyncProgress(loaded = loaded, total = total))
+          yield()
         }
       }
 
       if (lastSynced == null) {
+        logger.i("refreshStations() - clearing and inserting new data")
         dao.clearAndInsert(allEntities, allConnectors)
       } else {
+        logger.i("refreshStations() - upserting data")
         dao.insert(allEntities, allConnectors)
       }
 
+      logger.i("refreshStations() - end")
       emit(SyncProgress(loaded = total, total = total, done = true))
       dao.setLastSyncedAt(now)
     } finally {
@@ -159,7 +171,7 @@ class ChargerRepositoryImpl(
   }.catch { e ->
     logger.e("Failed to fetch chargers", e)
     crashReporter.recordException(e)
-  }
+  }.flowOn(Dispatchers.IO)
 
   override fun getStationFlow() = dao.getStationsWithConnectors()
 }
