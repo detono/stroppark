@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.3.0](https://github.com/detono/stroppark/compare/v1.2.4...v1.3.0) (2026-03-26)
+
+
+### Features
+
+* follow user's continuously ([bd28a72](https://github.com/detono/stroppark/commit/bd28a7259a3fc19649b2a58ee1bd8ffcd1a2d8bc))
+* follow user's continuously ([18cb099](https://github.com/detono/stroppark/commit/18cb09940e39e6d6d6ad082e28deedd8177531e8))
+* user now sees information when loading lots of chargers instead of infinite loading symbol ([84f1aa6](https://github.com/detono/stroppark/commit/84f1aa6851251f6aa3c1c8a723456ee1313b2ca8))
+
+
+### Bug Fixes
+
+* added bottom content padding value to avoid error hiding last item ([3a28e81](https://github.com/detono/stroppark/commit/3a28e81ef8d8c0842ca1be7567adc4f472a952aa))
+* first chargers were never inserted ([15ccba4](https://github.com/detono/stroppark/commit/15ccba4709bfc3f019f08165be32a953613a30bb))
+
+
+### Performance Improvements
+
+* increased perceived performance with flowOn IO & changing limit to 2k ([6fd8e9e](https://github.com/detono/stroppark/commit/6fd8e9ef7a801cb341a373d2d57a9d31698ba094))
+* use safer tryLock & also ask in parallel 5k chargers at a time to speed up time ([e833223](https://github.com/detono/stroppark/commit/e833223204b13b58fed511f20dff6f3055d000f9))
+
 ## [1.2.4](https://github.com/detono/stroppark/compare/v1.2.3...v1.2.4) (2026-03-23)
 
 
