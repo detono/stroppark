@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.yield
 import kotlin.time.Clock
@@ -35,7 +34,7 @@ class ChargerRepositoryImpl(
   private val logger: Logger = Logger.withTag("ParkingRepositoryImpl"),
   private val httpClient: HttpClient,
   private val dao: ChargerDao,
-  private val crashReporter: CrashReporter
+  private val crashReporter: CrashReporter,
 ): ChargerRepository {
   override suspend fun getChargers(): List<ChargerPoint> {
     val url = "https://data.stad.gent/api/explore/v2.1/catalog/datasets/laadpalen-gent/records"
@@ -88,6 +87,8 @@ class ChargerRepositoryImpl(
   private val refreshMutex = Mutex()
 
   override suspend fun refreshStations(): Flow<SyncProgress> = flow {
+    logger.i("refreshStations()")
+
     if (!refreshMutex.tryLock()) return@flow
 
     try {
@@ -116,6 +117,11 @@ class ChargerRepositoryImpl(
 
       val allEntities = mutableListOf<StationEntity>()
       val allConnectors = mutableListOf<ConnectorEntity>()
+
+      allEntities += initialResponse.data.map { it.toEntity() }
+      allConnectors += initialResponse.data.flatMap { station ->
+        station.connectors.map { it.toEntity(station.id) }
+      }
 
       var loaded = initialResponse.data.size
       emit(SyncProgress(loaded = loaded, total = total))
@@ -155,7 +161,7 @@ class ChargerRepositoryImpl(
       }
 
       if (lastSynced == null) {
-        logger.i("refreshStations() - clearing and inserting new data")
+        logger.i("refreshStations() - clearing and inserting ${allEntities.size} new data")
         dao.clearAndInsert(allEntities, allConnectors)
       } else {
         logger.i("refreshStations() - upserting data")
