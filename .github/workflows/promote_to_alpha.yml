@@ -1,0 +1,28 @@
+name: Promote to Closed Testing
+
+on:
+  workflow_dispatch:  # manual trigger only — you decide when to promote
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Google OAuth Token
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+
+      - name: Promote Internal → Closed Testing
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: fyi.tono.stroppark
+          track: internal
+          inAppUpdatePriority: 2
+          status: completed
+          fromTrack: internal
+          toTrack: alpha   # "alpha" is what Play calls closed testing
