@@ -15,6 +15,8 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
 }
 
+var mapsApiKey = ""
+
 buildkonfig {
     packageName = "fyi.tono.stroppark"
 
@@ -27,7 +29,10 @@ buildkonfig {
             localPropertiesFile.inputStream().use { localProperties.load(it) }
         }
 
+        mapsApiKey = localProperties["MAP_API_KEY"].toString()
+
         buildConfigField(STRING, "API_BASE_URL", "https://ocm.tono.fyi")
+        buildConfigField(STRING, "MAPS_API_KEY", mapsApiKey)
 
         // Priority: 1. Environment Variable (CI) 2. local.properties (Local) 3. Empty fallback
         val apiKey = System.getenv("OCM_API_KEY")
@@ -123,6 +128,10 @@ kotlin {
             //Room
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+
+            //GMaps
+            implementation(libs.kmp.maps.compose)
+            implementation(libs.kmp.maps.compose.utils)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -157,11 +166,12 @@ android {
         }
     }
 
-
     defaultConfig {
         applicationId = "fyi.tono.stroppark"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
+
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
 
         versionCode = ciVersionCode
         versionName = ciVersionName

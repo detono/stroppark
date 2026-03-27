@@ -24,7 +24,8 @@ fun StropParkBottomBar(
 
     val items = listOf(
       NavItem.Parking,
-      NavItem.Chargers
+      NavItem.Chargers,
+      NavItem.Map
     )
 
     items.forEach { item ->

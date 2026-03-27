@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 val GhentPurple = Color(0xFF5D3F6A) // Deep, royal purple/blue
 val GhentCyan = Color(0xFF00A1E2)   // Vibrant city cyan
 val GhentYellow = Color(0xFFFFD100) // Accent yellow
+val GhentGreen = Color(0xFF009B77) // Official Ghent Green (Teal/Emerald)
 val GhentWhite = Color(0xFFFFFFFF)
 val GhentBlack = Color(0xFF1A1A1A)
 

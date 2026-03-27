@@ -15,6 +15,7 @@ import fyi.tono.stroppark.core.location.getGeoUri
 import fyi.tono.stroppark.core.utils.LocalSnackbar
 import fyi.tono.stroppark.features.chargers.domain.ChargerFilter
 import fyi.tono.stroppark.features.chargers.ui.ChargerAction
+import fyi.tono.stroppark.features.chargers.ui.ChargerTestTags
 import fyi.tono.stroppark.features.chargers.ui.ChargerUiState
 import fyi.tono.stroppark.features.parking.ui.ParkingTestTags
 import kotlinx.coroutines.launch
@@ -54,6 +55,7 @@ fun ChargerList(
   val scope = rememberCoroutineScope()
 
   LazyColumn(
+    modifier = modifier,
     contentPadding = PaddingValues(
       start = 16.dp,
       end = 16.dp,
@@ -64,7 +66,7 @@ fun ChargerList(
   ) {
     item {
       ChargerFilterChipRow(
-        modifier = Modifier.testTag(ParkingTestTags.CHIP_ROW),
+        modifier = Modifier.testTag(ChargerTestTags.CHIP_ROW),
         availableFilters = uiState.availableFilters,
         activeFilters = activeFilters,
         onFilterToggle = {

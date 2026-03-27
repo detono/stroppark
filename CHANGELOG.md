@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/detono/stroppark/compare/v1.3.0...v1.4.0) (2026-03-26)
+
+
+### Features
+
+* Google maps integration ([#15](https://github.com/detono/stroppark/issues/15)) ([8249317](https://github.com/detono/stroppark/commit/8249317afe25c2589038cf4e2d0c62c15466296f))
+
 ## [1.3.0](https://github.com/detono/stroppark/compare/v1.2.4...v1.3.0) (2026-03-26)
 
 

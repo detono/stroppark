@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.tasks.await
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class LocationServiceImpl(
   private val context: Context,
   private val logger: Logger = Logger.withTag("LocationService")
@@ -42,9 +43,10 @@ actual class LocationServiceImpl(
 
     val locationRequest = LocationRequest.Builder(
       Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-      10_000L
+      5_000L
     ).apply {
-      setMinUpdateDistanceMeters(100f)
+      setMinUpdateIntervalMillis(2_000L)
+      setMinUpdateDistanceMeters(30f)
     }.build()
 
     val callback = object : LocationCallback() {
