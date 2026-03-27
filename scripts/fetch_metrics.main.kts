@@ -10,8 +10,7 @@ val accessToken = System.getenv("PLAY_API_TOKEN")
 val packageName = System.getenv("PACKAGE_NAME")
     ?: throw IllegalArgumentException("Missing PACKAGE_NAME")
 
-// Dynamic dates: today and 7 days ago
-val endDate = LocalDate.now()
+val endDate = LocalDate.now().minusDays(1)
 val startDate = endDate.minusDays(7)
 
 fun LocalDate.toJsonFragment() =
