@@ -19,6 +19,8 @@ fun LocalDate.toJsonFragment() =
 
 val payload = """
     {
+      "dimensions": ["versionCode"],
+      "metrics": ["crashRate"],
       "timelineSpec": {
         "aggregationPeriod": "DAILY",
         "startTime": ${startDate.toJsonFragment()},
@@ -28,7 +30,7 @@ val payload = """
 """.trimIndent()
 
 val endpoint = URL(
-    "https://playdeveloperreporting.googleapis.com/v1beta1/apps/$packageName/vitals/crashrate:query"
+    "https://playdeveloperreporting.googleapis.com/v1beta1/apps/${packageName.replace(".", "%2E")}/crashRateMetricSet:query"
 )
 
 with(endpoint.openConnection() as HttpURLConnection) {
