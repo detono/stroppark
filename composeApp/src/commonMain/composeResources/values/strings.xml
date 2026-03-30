@@ -18,6 +18,10 @@
     <string name="charger_filter_kw_50">50kW+</string>
     <string name="charger_filter_kw_150">150kW+</string>
 
+    <string name="charger_offline">Offline</string>
+    <string name="charger_operational">Operational</string>
+    <string name="charger_fast_charge">Fast Charge</string>
+
     <string name="map_filter_chargers">Chargers</string>
     <string name="map_filter_parking">Parking</string>
     <string name="charger_sync_progress">Synchronising %1$d of %2$d chargers</string>
