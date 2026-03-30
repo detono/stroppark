@@ -64,16 +64,20 @@ fun MapScreenContent(
   uiState: MapUiState,
   onAction: (MapAction) -> Unit
 ) {
-  val markers = remember(uiState.chargers, uiState.parking, uiState.activeFilters) {
-    uiState.getMarkers()
-  }
-
   val cameraPositionState = rememberCameraPositionState() {
     position = CameraPosition(
       target = LatLng(uiState.currentLocation.lat, uiState.currentLocation.lon),
       zoom = uiState.currentZoom
     )
   }
+
+  LaunchedEffect(cameraPositionState.isMoving) {
+    if (!cameraPositionState.isMoving) {
+      val bounds = cameraPositionState.projection?.visibleBounds
+      onAction(MapAction.UpdateBounds(bounds))
+    }
+  }
+
 
   var hasMovedToInitialLocation by remember { mutableStateOf(false) }
 
@@ -107,6 +111,7 @@ fun MapScreenContent(
 
     when (uiState.mapSelection) {
       is MapSelection.Charger -> {
+        println("I HAVE A CHARGER")
         val charger = uiState.mapSelection.charger
 
         MarkerModalBottomSheet(
@@ -129,7 +134,7 @@ fun MapScreenContent(
       }
       is MapSelection.Parking -> {
         val parking = uiState.mapSelection.location
-
+        println("I HAVE A parKING")
         MarkerModalBottomSheet(
           content = {
             if (parking.hasCoordinates) {
@@ -164,6 +169,7 @@ fun MapScreenContent(
         )
 
         GoogleMap(
+
           cameraPositionState = cameraPositionState,
           uiSettings = MapUiSettings(zoomControlsEnabled = true),
           onMapLoaded = {
@@ -173,10 +179,9 @@ fun MapScreenContent(
           properties = MapProperties(isMyLocationEnabled = uiState.locationPermissionState == LocationPermissionState.Granted),
           content = {
             Clustering(
-              items = markers,
+              items = uiState.markers,
               onClusterItemClick = { marker ->
                 onAction(MapAction.SelectMarker(marker.id, marker.type))
-
                 true
               },
               onClusterClick = { _ ->
