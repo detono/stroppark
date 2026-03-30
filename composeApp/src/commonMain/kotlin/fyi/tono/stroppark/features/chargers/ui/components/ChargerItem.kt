@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.EuroSymbol
+import androidx.compose.material.icons.rounded.NearMe
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,9 +33,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import fyi.tono.stroppark.core.location.LocationUtils
 import fyi.tono.stroppark.core.ui.components.molecules.InfoChip
 import fyi.tono.stroppark.core.ui.components.molecules.StatusChip
 import fyi.tono.stroppark.features.chargers.ui.ChargerUiModel
+import org.jetbrains.compose.resources.stringResource
+import stroppark.composeapp.generated.resources.Res
+import stroppark.composeapp.generated.resources.charger_fast_charge
+import stroppark.composeapp.generated.resources.charger_offline
+import stroppark.composeapp.generated.resources.charger_operational
 
 @Composable
 fun ChargerItem(
@@ -48,9 +55,9 @@ fun ChargerItem(
     else                   -> MaterialTheme.colorScheme.primary
   }
   val statusLabel = when {
-    !station.isOperational -> "Offline"
-    station.hasFastCharge  -> "Fast charge"
-    else                   -> "Operational"
+    !station.isOperational -> stringResource(Res.string.charger_offline)
+    station.hasFastCharge  -> stringResource(Res.string.charger_fast_charge)
+    else                   -> stringResource(Res.string.charger_operational)
   }
 
   val animatedPower by animateFloatAsState(
@@ -106,6 +113,8 @@ fun ChargerItem(
             color = statusColor,
           )
         }
+
+
       }
 
       Spacer(Modifier.height(12.dp))
@@ -124,6 +133,16 @@ fun ChargerItem(
           containerColor = statusColor.copy(alpha = 0.12f),
           labelColor = statusColor,
         )
+
+        station.distanceKm?.let { km ->
+          val label = if (km < 1.0) "${(km * 1000).toInt()} m" else LocationUtils.formatDistance(km)
+          InfoChip(
+            label = label,
+            icon = Icons.Rounded.NearMe,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+          )
+        }
 
         // Fast charge chip
         if (station.hasFastCharge) {
