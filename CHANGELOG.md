@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/detono/stroppark/compare/v1.4.0...v1.5.0) (2026-03-31)
+
+
+### Features
+
+* android auto ([#17](https://github.com/detono/stroppark/issues/17)) ([3a1d139](https://github.com/detono/stroppark/commit/3a1d13938c2d5ad81143a1bd96459fdfe68f7f8f))
+
 ## [1.4.0](https://github.com/detono/stroppark/compare/v1.3.0...v1.4.0) (2026-03-26)
 
 
