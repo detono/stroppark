@@ -16,6 +16,7 @@ import fyi.tono.stroppark.features.map.domain.MapMarker
 import fyi.tono.stroppark.features.map.domain.MapSelection
 import fyi.tono.stroppark.features.map.domain.PoiType
 import fyi.tono.stroppark.features.parking.domain.ParkingRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -45,6 +46,7 @@ class MapViewModel(
   private val chargerRepository: ChargerRepository,
   private val locationService: LocationService,
   private val locationPermission: LocationPermissionService,
+  private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
   private val logger: Logger = Logger.withTag("MapViewModel")
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(MapUiState())
@@ -81,7 +83,7 @@ class MapViewModel(
 
     Triple(chargers, parking, allPossibleMarkers)
   }
-    .flowOn(Dispatchers.Default)
+    .flowOn(defaultDispatcher)
     .onEach { (chargers, parking, markers) ->
       _uiState.update {
         it.copy(

@@ -21,6 +21,10 @@ class FakeLocationService : LocationService {
     GhentCoordinatesDto(51.0547, 3.7178),
   )
 
+  override suspend fun getLastKnownLocation(): GhentCoordinatesDto? {
+    return mockLocation
+  }
+
   override suspend fun getCurrentLocation(): GhentCoordinatesDto? = mockLocation
   override fun getLocationFlow(): Flow<GhentCoordinatesDto?> {
     return flow<GhentCoordinatesDto?> {
