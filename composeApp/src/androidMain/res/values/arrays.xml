@@ -1,0 +1,7 @@
+
+<resources>
+    <string-array name="hosts_allowlist">
+        <item>com.google.android.projection.gearhead</item>
+        <item>com.android.automotive.os.CarService</item>
+    </string-array>
+</resources>

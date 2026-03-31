@@ -34,3 +34,9 @@
 # Explicitly protect the reporter and utils
 -keep class fyi.tono.stroppark.core.utils.CrashReporter { *; }
 -keep class fyi.tono.stroppark.core.utils.** { *; }
+
+# Android Auto / Car App Library
+-keep class * extends androidx.car.app.CarAppService { *; }
+-keep class * extends androidx.car.app.Session { *; }
+-keep class * extends androidx.car.app.Screen { *; }
+-keep class androidx.car.app.validation.HostValidator { *; }
