@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.EnergySavingsLeaf
 import androidx.compose.material.icons.rounded.LocalOffer
+import androidx.compose.material.icons.rounded.NearMe
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import fyi.tono.stroppark.core.location.LocationUtils
 import fyi.tono.stroppark.core.ui.components.molecules.InfoChip
 import fyi.tono.stroppark.core.ui.components.molecules.StatusChip
 import fyi.tono.stroppark.core.ui.theme.GhentYellow
@@ -153,6 +155,16 @@ fun ParkingCard(
             modifier = Modifier.testTag("${parking.id}.${ParkingFilter.LEZ.name}"),
             label = "LEZ",
             icon = Icons.Rounded.EnergySavingsLeaf,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+          )
+        }
+
+        parking.distanceKm?.let { km ->
+          val label = if (km < 1.0) "${(km * 1000).toInt()} m" else LocationUtils.formatDistance(km)
+          InfoChip(
+            label = label,
+            icon = Icons.Rounded.NearMe,
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
           )

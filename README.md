@@ -10,38 +10,69 @@
 ![License](https://img.shields.io/github/license/detono/stroppark?style=flat-square)
 [![Support Tono on Ko-fi](https://img.shields.io/badge/Support_Tono-Tea-BD8C5E?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/detono)
 
-# StropPark
+# StropPark 🚗⚡️
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+StropPark is a modern, cross-platform mobile application designed to help users locate parking facilities and EV charging stations, specifically tailored with data for the city of Ghent.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Built entirely with **Kotlin Multiplatform (KMP)** and **Compose Multiplatform**, this project shares business logic, networking, local persistence, and the presentation layer across both Android and iOS, ensuring a native-feeling experience with minimal code duplication.
 
-### Build and Run Android Application
+## ✨ Features
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+* **Interactive Map:** View parking spots and EV chargers on an interactive map.
+* **Real-time Availability:** Check the status and availability of connectors and parking bays.
+* **Smart Filtering:** Filter points of interest by type (Parking vs. Chargers).
+* **Cross-Platform UI:** A fully shared user interface written in Compose Multiplatform.
+* **Offline Caching:** Local database caching to ensure a smooth experience even with patchy network connectivity.
 
-### Build and Run iOS Application
+## 🛠 Tech Stack & Architecture
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+The application strictly adheres to **Clean Architecture** principles and the **Unidirectional Data Flow (MVI)** pattern, modularised by feature (`chargers`, `map`, `parking`).
 
----
+* **Language:** [Kotlin](https://kotlinlang.org/)
+* **UI Framework:** [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+* **Networking:** [Ktor](https://ktor.io/)
+* **Local Persistence:** [Room (Multiplatform)](https://developer.android.com/training/data-storage/room)
+* **Concurrency:** [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & Flow
+* **Dependency Injection:** Shared DI module implementation
+* **Location Services:** Moko Location for handling permissions and location tracking natively across platforms.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## 📁 Project Structure
+
+The shared code is located in the `composeApp/src/commonMain/kotlin` directory, broken down into clear, feature-based packages:
+
+* `core`: Shared utilities, themes, database configurations, location services, and network clients.
+* `chargers`: Domain, data, database, and UI logic for EV charging stations.
+* `map`: Logic and UI components for the interactive map interface.
+* `parking`: Domain, data, database, and UI logic for standard parking facilities.
+
+Platform-specific implementations (such as crash reporting or specific permission handling) are securely abstracted using Kotlin's `expect`/`actual` mechanism within the `androidMain` and `iosMain` source sets.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* **Android Studio** (latest stable or Ladybug/Meerkat depending on KMP plugin requirements) or **Fleet**.
+* **Xcode** (for iOS development).
+* **JDK 17+**
+
+### Building for Android
+
+1. Open the project in Android Studio.
+2. Select the `composeApp` run configuration.
+3. Click **Run** (or hit `Shift + F10`).
+
+### Building for iOS
+
+1. Open the project in Android Studio or Xcode.
+2. Ensure you have the necessary iOS simulators installed.
+3. Select the `iosApp` run configuration.
+4. Click **Run**.
+  * *Alternatively*, you can open `iosApp/iosApp.xcworkspace` directly in Xcode and build from there.
+
+## 🧪 Testing
+
+The codebase maintains a strong focus on testability. Fakes for data sources (e.g., `FakeChargerRepository`, `FakeParkingDao`) are provided in the `commonTest` directory.
+
+To run the shared tests:
+```bash
+./gradlew clean test

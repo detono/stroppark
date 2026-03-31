@@ -22,6 +22,19 @@ actual class LocationServiceImpl(
   private val logger: Logger = Logger.withTag("LocationService")
 ) : LocationService {
   @SuppressLint("MissingPermission")
+  actual override suspend fun getLastKnownLocation(): GhentCoordinatesDto? {
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    return try {
+      fusedLocationClient.lastLocation.await()?.let {
+        GhentCoordinatesDto(it.latitude, it.longitude)
+      }
+    } catch (e: Exception) {
+      logger.e("Error getting last known location", e)
+      null
+    }
+  }
+
+  @SuppressLint("MissingPermission")
   actual override suspend fun getCurrentLocation(): GhentCoordinatesDto? {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     return try {

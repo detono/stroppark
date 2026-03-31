@@ -18,38 +18,9 @@ data class MapUiState(
   val isLoading: Boolean = true,
   val activeFilters: Set<MapFilter> = setOf(MapFilter.PARKING, MapFilter.CHARGERS),
   val mapSelection: MapSelection? = null,
-
+  val markers: List<MapMarker> = emptyList()
 ) {
   companion object {
     val DefaultLocation = GhentCoordinatesDto(lat = 51.0543422, lon = 3.7174243)
-  }
-
-  fun getMarkers(): List<MapMarker> {
-    val markers = mutableListOf<MapMarker>()
-    if (activeFilters.contains(MapFilter.CHARGERS)) {
-      markers.addAll(chargers.filterNot { it.longitude == null || it.latitude == null }.map {
-        MapMarker(
-          id = it.id.toString(),
-          poiTitle = it.name,
-          latitude = it.latitude!!,
-          longitude = it.longitude!!,
-          type = PoiType.CHARGER
-        )
-      })
-    }
-
-    if (activeFilters.contains(MapFilter.PARKING)) {
-      markers.addAll(parking.filterNot { it.longitude == null || it.latitude == null }.map {
-        MapMarker(
-          id = it.id,
-          poiTitle = it.name,
-          latitude = it.latitude!!,
-          longitude = it.longitude!!,
-          type = PoiType.PARKING
-        )
-      })
-    }
-
-    return markers
   }
 }

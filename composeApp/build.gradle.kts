@@ -83,6 +83,10 @@ kotlin {
 
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.analytics)
+
+            // Android Auto
+            implementation(libs.androidx.app)
+            implementation(libs.androidx.car.app.projected)
         }
         iosMain.dependencies {
             implementation(ktorLibs.client.darwin)
@@ -221,4 +225,3 @@ dependencies {
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
 }
-

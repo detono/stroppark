@@ -68,8 +68,16 @@ val featureModule = module {
       logger = get { parametersOf("ChargerViewModel") }
     )
   }
+  factory {
+    MapViewModel(
+      parkingRepository = get(),
+      chargerRepository = get(),
+      locationService = get(),
+      locationPermission = get(),
+      logger = get { parametersOf("MapViewModel") }
+    )
+  }
   factoryOf(::ParkingViewModel)
-  factoryOf(::MapViewModel)
 }
 
 val locationModule = module {

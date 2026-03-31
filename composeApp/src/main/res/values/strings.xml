@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="charger_nearby">Nearby Chargers</string>
+    <string name="parking_title">Parking</string>
+    <string name="charger_title">Chargers</string>
+    <string name="parking_nearby">Nearby Parking</string>
+</resources>

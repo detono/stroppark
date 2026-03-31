@@ -62,7 +62,7 @@ class ChargerViewModel(
     val safeLocationFlow = permissionState.flatMapLatest { state ->
       if (state == LocationPermissionState.Granted) {
         locationService.getLocationFlow()
-          .onStart { emit(null) }
+          .onStart { emit(locationService.getLastKnownLocation()) }
           .catch { emit(null) }
       } else {
         flowOf(null)
