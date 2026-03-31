@@ -7,6 +7,10 @@ on:
         description: 'Version Name (leave blank to auto-use the latest release-please tag)'
         required: false 
         default: ''     
+      version_code:
+        description: 'Version Code'
+        required: true 
+        default: ''     
 
 jobs:
   manual-build-and-deploy:
@@ -53,6 +57,7 @@ jobs:
           OCM_API_KEY: ${{ secrets.OCM_API_KEY }}
           # Now we use the environment variable we created in the bash script
           VERSION_NAME: ${{ env.RESOLVED_VERSION }} 
+          VERSION_CODE: ${{ github.event.inputs.version_code }}
 
       - name: Upload to Google Play Internal Testing
         uses: r0adkll/upload-google-play@v1.1.3
