@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/detono/stroppark/compare/v1.5.1...v1.5.2) (2026-04-01)
+
+
+### Bug Fixes
+
+* resolve maps API key not injected in release builds ([baa38fa](https://github.com/detono/stroppark/commit/baa38fad6420be0ca17c0eabe5b72e9364468a76))
+
 ## [1.5.1](https://github.com/detono/stroppark/compare/v1.5.0...v1.5.1) (2026-04-01)
 
 
