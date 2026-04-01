@@ -12,6 +12,7 @@ import kotlinx.coroutines.yield
 
 class FakeLocationService : LocationService {
   var mockLocation: GhentCoordinatesDto? = GhentCoordinatesDto(51.0543, 3.7174)
+  var shouldHaveLastKnownLocation: Boolean = true
 
   var mockLocations = listOf(
     GhentCoordinatesDto(51.0543, 3.7174),
@@ -22,7 +23,7 @@ class FakeLocationService : LocationService {
   )
 
   override suspend fun getLastKnownLocation(): GhentCoordinatesDto? {
-    return mockLocation
+    return if (shouldHaveLastKnownLocation) mockLocation else null
   }
 
   override suspend fun getCurrentLocation(): GhentCoordinatesDto? = mockLocation

@@ -6,6 +6,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 
 class FakeLocationPermissionService : LocationPermissionService {
+  var wasRequestCalled = false
+    private set
+
   override val state = MutableStateFlow<LocationPermissionState>(LocationPermissionState.NotDetermined)
-  override suspend fun requestPermission() {}
+  override suspend fun requestPermission() {
+    wasRequestCalled = true
+  }
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.fakes.FakeChargerRepository
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
@@ -22,6 +23,7 @@ import fyi.tono.stroppark.features.core.ui.setContentWithSnackbar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 
@@ -351,5 +353,27 @@ class ChargerListScreenTests: BaseUiTests() {
     awaitIdle()
 
     onNodeWithTag(ChargerTestTags.SYNC_PROGRESS_CARD).assertIsDisplayed()
+  }
+
+  @Test
+  fun `when permission is NotDetermined, RequestLocationPermission action is fired on launch`() = runComposeUiTest {
+    fakePermissionService.state.value = LocationPermissionState.NotDetermined
+
+    setContentWithSnackbar {
+      ChargerListScreen(viewModel = viewModel)
+    }
+
+    assertTrue(fakePermissionService.wasRequestCalled)
+  }
+
+  @Test
+  fun `when permission is Granted, RequestLocationPermission action is NOT fired on launch`() = runComposeUiTest {
+    fakePermissionService.state.value = LocationPermissionState.Granted
+
+    setContentWithSnackbar {
+      ChargerListScreen(viewModel = viewModel)
+    }
+
+    assertFalse(fakePermissionService.wasRequestCalled, "Permission should NOT have been requested")
   }
 }

@@ -17,6 +17,7 @@ import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
 import fyi.tono.stroppark.fakes.FakeParkingRepository
+import fyi.tono.stroppark.features.chargers.ui.screens.ChargerListScreen
 import fyi.tono.stroppark.features.core.ui.BaseUiTests
 import fyi.tono.stroppark.features.core.ui.setContentWithSnackbar
 import fyi.tono.stroppark.features.parking.domain.ParkingFilter
@@ -27,6 +28,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -292,5 +294,51 @@ class ParkingListScreenTest: BaseUiTests() {
 
     onNodeWithText("Location needed").assertIsDisplayed()
     onNodeWithText("We need your location to calculate distances to nearby parking.").assertIsDisplayed()
+  }
+
+  @Test
+  fun `when permission is NotDetermined, RequestLocationPermission action is fired on launch`() = runComposeUiTest {
+    val fakeRepo = FakeParkingRepository()
+    val fakeLocService = FakeLocationService()
+    val fakePermService = FakeLocationPermissionService()
+
+
+    fakePermService.state.value = LocationPermissionState.NotDetermined
+    val testViewModel = ParkingViewModel(fakeRepo, fakeLocService, fakePermService)
+
+    val testModule = module {
+      factory { testViewModel }
+    }
+
+    loadKoinModules(testModule)
+
+    setContentWithSnackbar {
+      ParkingListScreen()
+    }
+
+    assertTrue(fakePermService.wasRequestCalled)
+  }
+
+  @Test
+  fun `when permission is Granted, RequestLocationPermission action is NOT fired on launch`() = runComposeUiTest {
+    val fakeRepo = FakeParkingRepository()
+    val fakeLocService = FakeLocationService()
+    val fakePermService = FakeLocationPermissionService()
+
+    fakePermService.state.value = LocationPermissionState.Granted
+
+    val testViewModel = ParkingViewModel(fakeRepo, fakeLocService, fakePermService)
+
+    val testModule = module {
+      factory { testViewModel }
+    }
+
+    loadKoinModules(testModule)
+
+    setContentWithSnackbar {
+      ParkingListScreen()
+    }
+
+    assertFalse(fakePermService.wasRequestCalled, "Permission should NOT have been requested")
   }
 }
