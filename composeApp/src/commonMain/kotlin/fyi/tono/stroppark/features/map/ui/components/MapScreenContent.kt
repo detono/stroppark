@@ -111,7 +111,6 @@ fun MapScreenContent(
 
     when (uiState.mapSelection) {
       is MapSelection.Charger -> {
-        println("I HAVE A CHARGER")
         val charger = uiState.mapSelection.charger
 
         MarkerModalBottomSheet(
@@ -134,7 +133,6 @@ fun MapScreenContent(
       }
       is MapSelection.Parking -> {
         val parking = uiState.mapSelection.location
-        println("I HAVE A parKING")
         MarkerModalBottomSheet(
           content = {
             if (parking.hasCoordinates) {
