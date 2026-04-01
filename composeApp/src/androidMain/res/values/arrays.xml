@@ -1,9 +1,6 @@
 
 <resources>
     <string-array name="hosts_allowlist">
-        <item>com.google.android.projection.gearhead</item>
-        <item>com.android.automotive.os.CarService</item>
-
         <item>fdb00c43dbde8b51cb312aa81d3b5fa17713adb94b28f598d77f8eb89daceedf,
             com.google.android.projection.gearhead</item>
 
