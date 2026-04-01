@@ -72,6 +72,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           OCM_API_KEY: ${{ secrets.OCM_API_KEY }}
+          MAP_API_KEY: ${{ secrets.MAP_API_KEY }}
           VERSION_NAME: ${{ env.VERSION_NAME }}
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
