@@ -1,6 +1,7 @@
 package fyi.tono.stroppark.features.parking.ui
 
 import fyi.tono.stroppark.core.location.LocationPermissionState
+import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
 import fyi.tono.stroppark.fakes.FakeParkingRepository
@@ -96,6 +97,9 @@ class ParkingViewModelTests: BaseViewModelTests() {
 
   @Test
   fun `spots are sorted by distance closest first`() = runTest {
+    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+
+    fakeLocationService.mockLocation = GhentCoordinatesDto(lat = 51.05, lon = 3.72)
     fakePermissionService.state.value = LocationPermissionState.Granted
 
     val testData = listOf(
@@ -124,6 +128,8 @@ class ParkingViewModelTests: BaseViewModelTests() {
     assertEquals("Nearby", spots[0].name)
     assertEquals("Medium", spots[1].name)
     assertEquals("Far Away", spots[2].name)
+
+    collectJob.cancel()
   }
 
   @Test
