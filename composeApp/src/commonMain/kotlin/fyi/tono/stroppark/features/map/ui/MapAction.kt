@@ -12,4 +12,6 @@ sealed interface MapAction {
   data class ToggleFilter(val filter: MapFilter): MapAction
   data class UpdateBounds(val bounds: LatLngBounds?): MapAction
   data class SelectMarker(val id: String, val type: PoiType): MapAction
+  data object DismissDialog: MapAction
+
 }
