@@ -29,7 +29,7 @@ buildkonfig {
             localPropertiesFile.inputStream().use { localProperties.load(it) }
         }
 
-        mapsApiKey = localProperties["MAP_API_KEY"].toString()
+        mapsApiKey = System.getenv("MAP_API_KEY") ?: localProperties["MAP_API_KEY"].toString()
 
         buildConfigField(STRING, "API_BASE_URL", "https://ocm.tono.fyi")
         buildConfigField(STRING, "MAPS_API_KEY", mapsApiKey)
