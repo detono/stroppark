@@ -27,8 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import fyi.tono.stroppark.core.ui.components.organisms.LocationPermissionDialog
-import fyi.tono.stroppark.core.utils.PermissionDialog
+import fyi.tono.stroppark.core.utils.LocationPermissionHandler
 import fyi.tono.stroppark.core.utils.openAppSettings
 import fyi.tono.stroppark.features.chargers.ui.ChargerAction
 import fyi.tono.stroppark.features.chargers.ui.ChargerTestTags
@@ -37,10 +36,6 @@ import fyi.tono.stroppark.features.chargers.ui.components.ChargerList
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import stroppark.composeapp.generated.resources.Res
-import stroppark.composeapp.generated.resources.app_dismiss
-import stroppark.composeapp.generated.resources.app_no_thx
-import stroppark.composeapp.generated.resources.app_ok
-import stroppark.composeapp.generated.resources.app_open_settings
 import stroppark.composeapp.generated.resources.charger_location_permission_perm_denied
 import stroppark.composeapp.generated.resources.charger_location_permission_text
 import stroppark.composeapp.generated.resources.charger_sync_finalizing
@@ -60,36 +55,26 @@ fun ChargerListScreen(viewModel: ChargerViewModel = koinViewModel()) {
     viewModel.onLifecycleEvent(isForeground = false)
   }
 
+  val permissionState by viewModel.permissionState.collectAsState()
   val locationDialog by viewModel.locationDialog.collectAsState()
-  when (locationDialog) {
-    PermissionDialog.Rationale -> {
-      LocationPermissionDialog(
-        title = Res.string.location_permission_title,
-        text = Res.string.charger_location_permission_text,
-        confirmText = Res.string.app_ok,
-        dismissText = Res.string.app_no_thx,
-        onConfirm = {
-          viewModel.onAction(ChargerAction.RequestLocationPermission)
-        },
-        onDismiss = { viewModel.onAction(ChargerAction.DismissDialog) }
-      )
-    }
-
-    PermissionDialog.Settings -> {
-      LocationPermissionDialog(
-        title = Res.string.location_permission_title_settings,
-        text = Res.string.charger_location_permission_perm_denied,
-        confirmText = Res.string.app_open_settings,
-        dismissText = Res.string.app_dismiss,
-        onConfirm = {
-          viewModel.onAction(ChargerAction.DismissDialog)
-          openAppSettings()
-        },
-        onDismiss = { viewModel.onAction(ChargerAction.DismissDialog) }
-      )
-    }
-    PermissionDialog.None -> Unit
-  }
+  LocationPermissionHandler(
+    permissionState = permissionState,
+    locationDialog = locationDialog,
+    onRequestPermission = {
+      viewModel.onAction(ChargerAction.RequestLocationPermission)
+    },
+    onDismissDialog = {
+      viewModel.onAction(ChargerAction.DismissDialog)
+    },
+    onOpenSettings = {
+      viewModel.onAction(ChargerAction.DismissDialog)
+      openAppSettings()
+    },
+    rationaleTitle = Res.string.location_permission_title,
+    rationaleText = Res.string.charger_location_permission_text,
+    settingsTitle = Res.string.location_permission_title_settings,
+    settingsText = Res.string.charger_location_permission_perm_denied
+  )
 
   PullToRefreshBox(
     modifier = Modifier.fillMaxSize(),

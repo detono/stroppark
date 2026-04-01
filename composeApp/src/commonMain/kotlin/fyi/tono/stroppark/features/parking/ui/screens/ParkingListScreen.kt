@@ -6,17 +6,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import fyi.tono.stroppark.core.ui.components.organisms.LocationPermissionDialog
-import fyi.tono.stroppark.core.utils.PermissionDialog
+import fyi.tono.stroppark.core.utils.LocationPermissionHandler
 import fyi.tono.stroppark.core.utils.openAppSettings
 import fyi.tono.stroppark.features.parking.ui.ParkingAction
 import fyi.tono.stroppark.features.parking.ui.ParkingViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import stroppark.composeapp.generated.resources.Res
-import stroppark.composeapp.generated.resources.app_dismiss
-import stroppark.composeapp.generated.resources.app_no_thx
-import stroppark.composeapp.generated.resources.app_ok
-import stroppark.composeapp.generated.resources.app_open_settings
 import stroppark.composeapp.generated.resources.location_permission_title
 import stroppark.composeapp.generated.resources.location_permission_title_settings
 import stroppark.composeapp.generated.resources.parking_location_permission_text
@@ -33,35 +28,26 @@ fun ParkingListScreen(viewModel: ParkingViewModel = koinViewModel ()) {
     viewModel.onLifecycleEvent(isForeground = false)
   }
 
+  val permissionState by viewModel.permissionState.collectAsState()
   val locationDialog by viewModel.locationDialog.collectAsState()
-  when (locationDialog) {
-    PermissionDialog.Rationale -> {
-      LocationPermissionDialog(
-        title = Res.string.location_permission_title,
-        text = Res.string.parking_location_permission_text,
-        confirmText = Res.string.app_ok,
-        dismissText = Res.string.app_no_thx,
-        onConfirm = {
-          viewModel.onAction(ParkingAction.RequestLocationPermission)
-        },
-        onDismiss = { viewModel.onAction(ParkingAction.DismissDialog) }
-      )
-    }
-    PermissionDialog.Settings -> {
-      LocationPermissionDialog(
-        title = Res.string.location_permission_title_settings,
-        text = Res.string.parking_location_permission_text,
-        confirmText = Res.string.app_open_settings,
-        dismissText = Res.string.app_dismiss,
-        onConfirm = {
-          viewModel.onAction(ParkingAction.DismissDialog)
-          openAppSettings()
-        },
-        onDismiss = { viewModel.onAction(ParkingAction.DismissDialog) }
-      )
-    }
-    PermissionDialog.None -> Unit
-  }
+  LocationPermissionHandler(
+    permissionState = permissionState,
+    locationDialog = locationDialog,
+    onRequestPermission = {
+      viewModel.onAction(ParkingAction.RequestLocationPermission)
+    },
+    onDismissDialog = {
+      viewModel.onAction(ParkingAction.DismissDialog)
+    },
+    onOpenSettings = {
+      viewModel.onAction(ParkingAction.DismissDialog)
+      openAppSettings()
+    },
+    rationaleTitle = Res.string.location_permission_title,
+    rationaleText = Res.string.parking_location_permission_text,
+    settingsTitle = Res.string.location_permission_title_settings,
+    settingsText = Res.string.parking_location_permission_text
+  )
 
   ParkingListScreenContent(
     uiState = uiState,
