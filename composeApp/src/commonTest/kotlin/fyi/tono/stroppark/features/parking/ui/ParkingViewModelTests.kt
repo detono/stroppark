@@ -66,6 +66,8 @@ class ParkingViewModelTests: BaseViewModelTests() {
 
     fakeRepository.dbFlow.emit(testData)
 
+    advanceUntilIdle()
+
     val currentState = viewModel.uiState.value
     assertEquals(false, currentState.isLoading)
     assertEquals(1, currentState.parkingSpots.size)
