@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/detono/stroppark/compare/v1.5.0...v1.5.1) (2026-04-01)
+
+
+### Bug Fixes
+
+* hopefully fixes the android auto "unexpected error" ([cd94752](https://github.com/detono/stroppark/commit/cd94752e0ae1781071cf83a44c98c305a847a518))
+
 ## [1.5.0](https://github.com/detono/stroppark/compare/v1.4.0...v1.5.0) (2026-03-31)
 
 
