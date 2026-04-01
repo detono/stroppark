@@ -8,7 +8,6 @@ import fyi.tono.stroppark.core.location.LocationPermissionService
 import fyi.tono.stroppark.core.location.LocationPermissionState
 import fyi.tono.stroppark.core.location.LocationService
 import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
-import fyi.tono.stroppark.di.loggerModule
 import fyi.tono.stroppark.features.chargers.domain.ChargerRepository
 import fyi.tono.stroppark.features.chargers.ui.toUiModel
 import fyi.tono.stroppark.features.map.domain.MapFilter
