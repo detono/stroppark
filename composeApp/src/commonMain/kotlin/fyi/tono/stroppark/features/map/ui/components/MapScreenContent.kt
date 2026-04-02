@@ -167,9 +167,11 @@ fun MapScreenContent(
         )
 
         GoogleMap(
-
           cameraPositionState = cameraPositionState,
-          uiSettings = MapUiSettings(zoomControlsEnabled = true),
+          uiSettings = MapUiSettings(
+            zoomControlsEnabled = true,
+            myLocationButtonEnabled = true
+          ),
           onMapLoaded = {
             onAction(MapAction.FinishedLoading)
           },
