@@ -4,4 +4,6 @@
     <string name="parking_title">Parking</string>
     <string name="charger_title">Chargers</string>
     <string name="parking_nearby">Nearby Parking</string>
+    <string name="calculating_distance">Calculating distance…</string>
+    <string name="spots_available">%1$d / %2$d available</string>
 </resources>
