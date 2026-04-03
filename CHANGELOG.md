@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.3](https://github.com/detono/stroppark/compare/v1.5.2...v1.5.3) (2026-04-03)
+
+
+### Bug Fixes
+
+* location should now be taken into account for android auto integration ([447a6d2](https://github.com/detono/stroppark/commit/447a6d24fade0f7e5647b6dc9a5719a8b16ca8d7))
+* myLocationButtonEnabled to true so location can position itself on map ([51a9159](https://github.com/detono/stroppark/commit/51a9159982c26c41de5420eeb1e5503be08ed10a))
+* when user gives location it should now correctly calculate distances ([d525a2b](https://github.com/detono/stroppark/commit/d525a2b2c034bbcd3c826e9502221c0986033960))
+
 ## [1.5.2](https://github.com/detono/stroppark/compare/v1.5.1...v1.5.2) (2026-04-01)
 
 
