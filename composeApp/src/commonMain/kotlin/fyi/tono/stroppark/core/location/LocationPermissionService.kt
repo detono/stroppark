@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.StateFlow
 interface LocationPermissionService {
   val state: StateFlow<LocationPermissionState>
   suspend fun requestPermission()
+  fun refreshPermissionState()
 }

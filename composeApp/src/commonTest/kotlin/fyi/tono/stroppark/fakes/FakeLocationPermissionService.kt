@@ -13,4 +13,8 @@ class FakeLocationPermissionService : LocationPermissionService {
   override suspend fun requestPermission() {
     wasRequestCalled = true
   }
+
+  override fun refreshPermissionState() {
+
+  }
 }

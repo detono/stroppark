@@ -60,11 +60,25 @@ class ChargerViewModel(
 
   init {
     val safeLocationFlow = permissionState.flatMapLatest { state ->
+      logger.d { "Permission changed: $state" }
+
       if (state == LocationPermissionState.Granted) {
+        logger.d { "Starting location flow" }
+
         locationService.getLocationFlow()
-          .onStart { emit(locationService.getLastKnownLocation()) }
-          .catch { emit(null) }
+          .onStart {
+            logger.d { "Emitting last known location" }
+
+            emit(locationService.getLastKnownLocation())
+          }
+          .catch {
+            logger.e(it) { "Location flow failed" }
+
+            emit(null)
+          }
       } else {
+        logger.d { "Emitting null because not granted" }
+
         flowOf(null)
       }
     }
@@ -127,6 +141,7 @@ class ChargerViewModel(
 
   fun onLifecycleEvent(isForeground: Boolean) {
     if (isForeground) {
+      locationPermission.refreshPermissionState()
       startPolling()
     } else {
       pollingJob?.cancel()

@@ -8,27 +8,39 @@ import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.location.LOCATION
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class MokoLocationPermissionService(
   private val controller: PermissionsController
 ) : LocationPermissionService {
+  private val _state = MutableStateFlow<LocationPermissionState>(LocationPermissionState.NotDetermined)
+  override val state: StateFlow<LocationPermissionState> = _state
 
-  override val state: StateFlow<LocationPermissionState> = flow {
-    val permission = controller.getPermissionState(Permission.LOCATION)
-    emit(permission.toLocationPermissionState())
-  }.stateIn(CoroutineScope(Dispatchers.Main), SharingStarted.Eagerly, LocationPermissionState.NotDetermined)
+  init {
+    CoroutineScope(Dispatchers.Main).launch {
+      _state.value = controller.getPermissionState(Permission.LOCATION).toLocationPermissionState()
+    }
+  }
 
   override suspend fun requestPermission() {
     try {
       controller.providePermission(Permission.LOCATION)
     } catch (e: DeniedException) {
-      // state flow will update automatically
     } catch (e: DeniedAlwaysException) {
-      // same
+    } finally {
+      // this runs after the user taps Allow or Deny
+      _state.value = controller.getPermissionState(Permission.LOCATION).toLocationPermissionState()
+    }
+  }
+
+  override fun refreshPermissionState() {
+    CoroutineScope(Dispatchers.Main).launch {
+      _state.value = controller.getPermissionState(Permission.LOCATION).toLocationPermissionState()
     }
   }
 }

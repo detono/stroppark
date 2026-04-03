@@ -143,6 +143,7 @@ class MapViewModel(
 
   fun onLifecycleEvent(isForeground: Boolean) {
     if (isForeground) {
+      locationPermission.refreshPermissionState()
       startPolling()
     } else {
       pollingJob?.cancel()

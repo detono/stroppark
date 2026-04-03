@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.swipeDown
 import fyi.tono.stroppark.core.location.LocationPermissionState
+import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
 import fyi.tono.stroppark.fakes.FakeParkingRepository
@@ -59,6 +60,24 @@ class ParkingListScreenTest: BaseUiTests() {
       latitude = 51.0416,
       longitude = 3.7271
     )
+  )
+
+  private fun makeParking(
+    id: String,
+    name: String,
+    latitude: Double,
+    longitude: Double,
+  ) = ParkingLocation(
+    id = id,
+    name = name,
+    operator = "Stad Gent",
+    availableCapacity = 0,
+    totalCapacity = 700,
+    open = true,
+    free = true,
+    lez = false,
+    latitude = latitude,
+    longitude = longitude
   )
 
   @Test
@@ -340,5 +359,67 @@ class ParkingListScreenTest: BaseUiTests() {
     }
 
     assertFalse(fakePermService.wasRequestCalled, "Permission should NOT have been requested")
+  }
+
+  @Test
+  fun `chargers are sorted by distance once the user allows location permission`() = runComposeUiTest {
+    val fakeRepo = FakeParkingRepository()
+    val fakeLocService = FakeLocationService()
+    val fakePermService = FakeLocationPermissionService()
+
+    fakePermService.state.value = LocationPermissionState.NotDetermined
+    fakeLocService.mockLocation = GhentCoordinatesDto(51.0543, 3.7174)
+
+    val parking = listOf(
+      makeParking(
+        id = "1",
+        name = "Far away",
+        latitude = 51.10,
+        longitude = 3.80
+      ),
+      makeParking(
+        id = "3",
+        name = "Nearby",
+        latitude = 51.0544,
+        longitude = 3.7175
+      ),
+      makeParking(
+        id = "2",
+        name = "Medium",
+        latitude = 51.06,
+        longitude = 3.73
+      ),
+    )
+
+    val testViewModel = ParkingViewModel(
+      fakeRepo,
+      fakeLocService,
+      fakePermService
+    )
+
+    fakeRepo.dbFlow.emit(parking)
+
+    val testModule = module {
+      factory { testViewModel }
+    }
+
+    loadKoinModules(testModule)
+
+    setContentWithSnackbar {
+      ParkingListScreen()
+    }
+    waitForIdle()
+
+    assertEquals(3, testViewModel.uiState.value.parkingSpots.size)
+    assertEquals("Far away", testViewModel.uiState.value.parkingSpots[0].name, "without location should be first")
+    assertEquals("Nearby", testViewModel.uiState.value.parkingSpots[1].name, "without location should be second")
+    assertEquals("Medium", testViewModel.uiState.value.parkingSpots[2].name, "without location should be last")
+
+    fakePermService.state.value = LocationPermissionState.Granted
+    waitForIdle()
+
+    assertEquals("Far away", testViewModel.uiState.value.parkingSpots[2].name, "with location far away should be last")
+    assertEquals("Nearby", testViewModel.uiState.value.parkingSpots[0].name, "with location nearby should be first")
+    assertEquals("Medium", testViewModel.uiState.value.parkingSpots[1].name, "with location medium should be second")
   }
 }

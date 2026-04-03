@@ -10,9 +10,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import fyi.tono.stroppark.core.location.LocationPermissionState
+import fyi.tono.stroppark.core.network.dto.GhentCoordinatesDto
 import fyi.tono.stroppark.fakes.FakeChargerRepository
 import fyi.tono.stroppark.fakes.FakeLocationPermissionService
 import fyi.tono.stroppark.fakes.FakeLocationService
+import fyi.tono.stroppark.features.chargers.database.ConnectorEntity
 import fyi.tono.stroppark.features.chargers.database.StationEntity
 import fyi.tono.stroppark.features.chargers.database.StationWithConnectors
 import fyi.tono.stroppark.features.chargers.domain.ChargerFilter
@@ -20,6 +22,7 @@ import fyi.tono.stroppark.features.chargers.ui.components.ChargerList
 import fyi.tono.stroppark.features.chargers.ui.screens.ChargerListScreen
 import fyi.tono.stroppark.features.core.ui.BaseUiTests
 import fyi.tono.stroppark.features.core.ui.setContentWithSnackbar
+import fyi.tono.stroppark.features.parking.domain.ParkingLocation
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,20 +49,43 @@ class ChargerListScreenTests: BaseUiTests() {
     )
   }
 
-  private fun makeStationWithConnectors() = StationWithConnectors(
+  private fun makeStationWithConnectors(
+    id: Long = 1L,
+    name: String = "Station $id",
+    isOperational: Boolean = true,
+    hasFastCharge: Boolean = false,
+    fastestChargerKw: Double? = null,
+    usageCost: String? = null,
+    latitude: Double? = null,
+    longitude: Double? = null,
+  ) = StationWithConnectors(
     station = StationEntity(
-      id = 1L,
-      name = "Test Station",
-      address = "Test Street 1",
-      latitude = 51.05,
-      longitude = 3.71,
+      id = id,
+      name = name,
+      latitude = latitude ?: 51.05,
+      longitude = longitude ?: 3.71,
       operator = null,
-      usageCost = null,
-      isOperational = true,
+      usageCost = usageCost,
+      isOperational = isOperational,
       numberOfPoints = 1,
+      address = null,
       distanceKm = null,
     ),
-    connectors = emptyList()
+    connectors = listOf(
+      ConnectorEntity(
+        id = id,
+        stationId = id,
+        typeName = null,
+        formalName = null,
+        powerKw = fastestChargerKw,
+        amps = null,
+        voltage = null,
+        currentType = null,
+        isFastCharge = hasFastCharge,
+        isOperational = isOperational,
+        quantity = null,
+      )
+    )
   )
 
 
@@ -375,5 +401,50 @@ class ChargerListScreenTests: BaseUiTests() {
     }
 
     assertFalse(fakePermissionService.wasRequestCalled, "Permission should NOT have been requested")
+  }
+
+  @Test
+  fun `chargers are sorted by distance once the user allows location permission`() = runComposeUiTest {
+    fakePermissionService.state.value = LocationPermissionState.NotDetermined
+    fakeLocationService.mockLocation = GhentCoordinatesDto(51.0543, 3.7174)
+
+    val chargers = listOf(
+      makeStationWithConnectors(
+        id = 1,
+        name = "Far away",
+        latitude = 51.10,
+        longitude = 3.80
+      ),
+      makeStationWithConnectors(
+        id = 3,
+        name = "Nearby",
+        latitude = 51.0544,
+        longitude = 3.7175
+      ),
+      makeStationWithConnectors(
+        id = 2,
+        name = "Medium",
+        latitude = 51.06,
+        longitude = 3.73
+      ),
+    )
+
+    fakeRepository.dbFlow.emit(chargers)
+
+    setContentWithSnackbar {
+      ChargerListScreen(viewModel = viewModel)
+    }
+
+    assertEquals(3, viewModel.uiState.value.chargers.size)
+    assertEquals("Far away", viewModel.uiState.value.chargers[0].name, "without location should be first")
+    assertEquals("Nearby", viewModel.uiState.value.chargers[1].name, "without location should be second")
+    assertEquals("Medium", viewModel.uiState.value.chargers[2].name, "without location should be last")
+
+    fakePermissionService.state.value = LocationPermissionState.Granted
+    waitForIdle()
+
+    assertEquals("Far away", viewModel.uiState.value.chargers[2].name, "with location far away should be last")
+    assertEquals("Nearby", viewModel.uiState.value.chargers[0].name, "with location nearby should be first")
+    assertEquals("Medium", viewModel.uiState.value.chargers[1].name, "with location medium should be second")
   }
 }
