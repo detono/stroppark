@@ -6,7 +6,6 @@ import fyi.tono.stroppark.features.map.domain.PoiType
 
 sealed interface MapAction {
   data object RequestLocationPermission: MapAction
-  data object LocationPermissionGranted: MapAction
   data object DismissMarker: MapAction
   data object FinishedLoading: MapAction
   data class ToggleFilter(val filter: MapFilter): MapAction
