@@ -116,6 +116,9 @@ class MapViewModel(
   private val _dialogDismissed = MutableStateFlow(false)
   val locationDialog = permissionState.combine(_dialogDismissed) { state, dismissed ->
     if (dismissed) return@combine PermissionDialog.None
+
+    _uiState.update { it.copy(locationPermissionState = state) }
+
     when (state) {
       LocationPermissionState.Denied -> PermissionDialog.Rationale
       LocationPermissionState.DeniedAlways -> PermissionDialog.Settings
@@ -152,10 +155,6 @@ class MapViewModel(
 
   fun onAction(action: MapAction) {
     when (action) {
-      MapAction.LocationPermissionGranted -> {
-        _uiState.update { it.copy(locationPermissionState = LocationPermissionState.Granted) }
-      }
-
       MapAction.RequestLocationPermission -> {
         _dialogDismissed.update { true }
         viewModelScope.launch {
