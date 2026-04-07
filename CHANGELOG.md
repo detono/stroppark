@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.4](https://github.com/detono/stroppark/compare/v1.5.3...v1.5.4) (2026-04-07)
+
+
+### Bug Fixes
+
+* now the uiState gets updated if permission gets granted ([3448316](https://github.com/detono/stroppark/commit/3448316134a88f5cd719f2050b6b8b79415d196b))
+
 ## [1.5.3](https://github.com/detono/stroppark/compare/v1.5.2...v1.5.3) (2026-04-03)
 
 
