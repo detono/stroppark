@@ -166,6 +166,16 @@ fun MapScreenContent(
           }
         )
 
+        var mapProperties by remember {
+          mutableStateOf(MapProperties(isMyLocationEnabled = true))
+        }
+
+        LaunchedEffect(uiState.locationPermissionState) {
+          mapProperties = MapProperties(
+            isMyLocationEnabled = uiState.locationPermissionState == LocationPermissionState.Granted
+          )
+        }
+
         GoogleMap(
           cameraPositionState = cameraPositionState,
           uiSettings = MapUiSettings(
@@ -176,7 +186,7 @@ fun MapScreenContent(
             onAction(MapAction.FinishedLoading)
           },
           modifier = modifier.fillMaxSize(),
-          properties = MapProperties(isMyLocationEnabled = uiState.locationPermissionState == LocationPermissionState.Granted),
+          properties = mapProperties,
           content = {
             Clustering(
               items = uiState.markers,
@@ -193,18 +203,24 @@ fun MapScreenContent(
                   modifier = Modifier
                     .size(40.dp)
                     .background(
+                      color = Color.White,
+                      shape = CircleShape
+                    )
+                    .padding(2.dp)
+                    .background(
                       color = if (marker.type == PoiType.CHARGER) GhentGreen else GhentCyan,
                       shape = CircleShape
                     )
                     .padding(8.dp),
-                  contentAlignment = Alignment.Center
-                ) {
-                  Icon(
-                    imageVector = if (marker.type == PoiType.CHARGER) Icons.Default.EvStation else Icons.Default.LocalParking,
-                    contentDescription = marker.title,
-                    tint = Color.White
-                  )
-                }
+                  contentAlignment = Alignment.Center,
+                  content = {
+                    Icon(
+                      imageVector = if (marker.type == PoiType.CHARGER) Icons.Default.EvStation else Icons.Default.LocalParking,
+                      contentDescription = marker.title,
+                      tint = Color.White
+                    )
+                  }
+                )
               }
             )
           }
